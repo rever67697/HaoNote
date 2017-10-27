@@ -1,0 +1,34 @@
+
+SharePreference缓存数据 → SharePreferenceUtils
+提供App数据清理工作的类 → DataCleanUtils
+缓存工具类 → CacheUtils
+App应用退出 → AppExit2Back
+管理和回收Activity → AppDavikActivityUtils
+获取App应用版本信息 → ApplicationUtils
+系统日志输出工具类 → LogMessageUtils
+获取本地指定资源信息 → GetResourceUtils
+自定义Toast提示框 → ToastUtils
+正则表达式 → ValidationUtils
+类型转换类 → ConvertUtils
+日期管理类 → DateUtils
+手机常用单位转换的辅助类 → DensityUtils
+文件管理类 → FileUtils
+view管理类 → ViewUtils
+SpannableString工具类 → SpannableStringUtils
+application工具类 → AppUtils
+Snackbar工具类 → SnackbarUtils
+Glide图片加载工具类 → GlideUtils
+图片管理工具类 → ImageUtils
+字符串判断工具类 → StringUtils
+Json工具类 → JsonUtils
+Fragment管理类 → FragmentUtils
+
+
+不常用：
+银行卡管理 → BankCheck
+软键盘管理 → KeyBoardUtils
+App网络管理 → NetworkUtils
+手机管理工具类 → PhoneManageUtils
+反射工具类 → ReflectionUtils
+获取App应用系统基本信息 → GetSystemUtils
+Wifi管理工具类 → WifiHelperUtils
