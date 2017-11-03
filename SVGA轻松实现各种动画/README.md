@@ -2,6 +2,10 @@
 
 github地址:https://github.com/yyued/SVGAPlayer-Android
 
+先看下效果图:
+
+ ![1](1.gif)
+
 ### 添加依赖:
 
 ~~~~JAVA
