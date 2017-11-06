@@ -3,7 +3,9 @@
 [TOC]
 
 先上效果图:
- ![1](C:\Users\C\Desktop\NoteGithub\HaoNote\ShortCuts的使用\1.gif)
+
+
+  ![1](1.gif)
 
 
 
@@ -40,7 +42,9 @@ public class MyApplication extends Application {
 
 然后在AndroidManifest.xml中添加application:
 
- ![2](C:\Users\C\Desktop\NoteGithub\HaoNote\ShortCuts的使用\2.png)
+  ![2](2.png)
+
+
 
 ### 在Activity中添加注解
 
@@ -65,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
 `@Shortcut`可以在类上也可以在方法上,如上图代码,分别在类和代码上, 如下图所示:
 
+ ![3](3.png)
 
 
-![3](C:\Users\C\Desktop\NoteGithub\HaoNote\ShortCuts的使用\3.png)
 
 其中`shortLabel`为长按的时候显示的文字信息,如上图所示的"去主页". `rank`为优先级,rank值越小,离图标就越近.
 
@@ -90,6 +94,6 @@ public class Main2Activity extends AppCompatActivity {
 
 注意:其中有个`backStack`属性,当在此activity点击返回键时,会回退到`backStack`属性设置的栈中,从后向前依次回退.如下图:
 
- ![6](C:\Users\C\Desktop\NoteGithub\HaoNote\ShortCuts的使用\6.gif)
+  ![6](6.gif)
 
 点击返回时,会先返回到Main3Activity,再点返回回到MainAcitity.
