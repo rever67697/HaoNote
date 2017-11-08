@@ -283,3 +283,5 @@ public class DeckViewSampleActivity extends Activity {
 ~~~~
 
 代码中都有注释，如有不懂，请看demo。
+
+demo下载地址：http://download.csdn.net/download/huchengzhiqiang/10108935
