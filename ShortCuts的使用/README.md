@@ -97,3 +97,7 @@ public class Main2Activity extends AppCompatActivity {
   ![6](6.gif)
 
 点击返回时,会先返回到Main3Activity,再点返回回到MainAcitity.
+
+
+
+demo地址：http://download.csdn.net/download/huchengzhiqiang/10111505
