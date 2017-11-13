@@ -1,6 +1,6 @@
 # 指定特定位置的圆点的显示
 
-[TOC]
+
 
 ## 先看效果图
 
@@ -185,5 +185,7 @@ public class LineCircleChart extends BarLineChartBase<LineData> implements 		  L
         //圆点的半径
         lineDataSet.setCircleRadius(5f);
 ~~~~
+
+特别强调：文中使用的是3.0.2版本的MPAndroid。
 
 demo源码位置：https://github.com/chinachance/ChartCubeDemo
