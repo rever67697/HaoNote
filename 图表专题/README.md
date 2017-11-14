@@ -189,3 +189,25 @@ public class LineCircleChart extends BarLineChartBase<LineData> implements 		  L
 特别强调：文中使用的是3.0.2版本的MPAndroid。
 
 demo源码位置：https://github.com/chinachance/ChartCubeDemo
+
+
+
+
+
+# 颜色渐变
+
+ ![2](2.png)
+
+在renderer中找到画的方法，修改：
+
+~~~~JAVA
+ 		//修改-------start
+        mRenderPaint.setColor(dataSet.getColor()); //注释掉
+        //添加
+        LinearGradient linearGradient = new LinearGradient(0, 0, 100, 100, new int[] {
+                Color.YELLOW, Color.GREEN }, null,
+                Shader.TileMode.REPEAT);
+        mRenderPaint.setShader(linearGradient);
+        //修改-------end
+~~~~
+
