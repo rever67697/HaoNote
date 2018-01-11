@@ -41,7 +41,17 @@ public class MyPopWindow extends PopupWindow {
     }
 
 }
-
 ~~~~
 
 3.把使用PopupWindow的地方改为自己写的MyPopWindow.
+
+### 注意:
+
+此种方法只能在静态布局中,即不能有数据动态的加入(例如: recyclerview),否则显示位置会变.
+
+如果有recyclerview或者其他,可以尝试使用**bottomsheet**,  github网址如下:
+
+https://github.com/Flipboard/bottomsheet
+
+
+
