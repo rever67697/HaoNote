@@ -56,14 +56,18 @@ public class Event {
   @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_now, container, false);
-        EventBus.getDefault().register(this);//订阅
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         return view;
     }
 
  @Override
     public void onDestroyView() {
         super.onDestroyView();
-        EventBus.getDefault().unregister(this);//解除订阅
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }//解除订阅
     }
 ~~~~
 
