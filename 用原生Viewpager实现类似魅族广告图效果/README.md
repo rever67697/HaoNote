@@ -32,6 +32,8 @@
     </FrameLayout>
 ~~~~
 
+ViewPager是设置中间的那个item的宽高,以及中间的item距离左边界和右边界的距离.
+
 再看逻辑代码:
 
 ~~~~java
