@@ -22,6 +22,7 @@ Glide图片加载工具类 → GlideUtils
 字符串判断工具类 → StringUtils
 Json工具类 → JsonUtils
 Fragment管理类 → FragmentUtils
+尺寸转换工具类 → DensityUtil
 
 
 不常用：
