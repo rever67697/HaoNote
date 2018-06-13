@@ -332,3 +332,144 @@ public class ExpressPresenter extends BasePresenter {
 
 
 demo地址：https://github.com/chinachance/Demos
+
+
+
+### 附加:RxCache 缓存库的使用
+
+##### 1.添加依赖
+
+在整个项目的build.gradle中添加:
+
+~~~~~~xml
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+~~~~~~
+
+在moudle的build.gradle中添加
+
+~~~xml
+compile "com.github.VictorAlbertos.RxCache:runtime:1.8.1-2.x"
+//如果已经添加 implementation 'io.reactivex.rxjava2:rxandroid:2.0.1' ,则没必要添加下边的rxjava
+compile "io.reactivex.rxjava2:rxjava:2.0.6"
+~~~
+
+##### 2.新建接口CacheProvider
+
+~~~java
+public interface CacheProvider {
+    /**
+     * 获取快递信息
+     * Rx方式
+     * @return Observable<ExpressInfo>
+     */
+    @ProviderKey("mocks") //可不写,用于标志
+    @LifeCache(duration = 1, timeUnit = TimeUnit.MINUTES)   //可不写 , 缓存有效期1分钟
+    Observable<ExpressInfo> getExpressInfoRx(Observable<ExpressInfo> oMocks, EvictProvider evictProvider);
+}
+~~~
+
+##### 3.新建RetrofitCacheHelper
+
+~~~java
+public class RetrofitCacheHelper {
+
+    private static RetrofitCacheHelper retrofitHelper;
+    /**
+     * 进行缓存的数据的接口
+     */
+    private CacheProvider mCacheProvider;
+    private static Context mContext;
+
+    public static RetrofitCacheHelper getInstance(Context context) {
+        mContext = context;
+        return retrofitHelper == null ? retrofitHelper = new RetrofitCacheHelper() : retrofitHelper;
+    }
+
+    private RetrofitCacheHelper() {
+        // 初始化Retrofit
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constant.SERVER_URL)
+                .addConverterFactory(GsonConverterFactory.create()) // json解析
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) // 支持RxJava
+                .client(RetrofitUtils.getOkHttpClient()) //打印请求参数
+                .build();
+        this.mCacheProvider = retrofit.create(CacheProvider.class);
+		
+        //rxcache初始化
+        //获取缓存的文件存放路径
+        File cacheDir =mContext.getFilesDir();
+        mCacheProvider = new RxCache.Builder()
+                .persistence(cacheDir, new GsonSpeaker())//配置缓存的文件存放路径，以及数据的序列化和反序列化
+                .using(CacheProvider.class);    //和Retrofit相似，传入缓存API的接口
+
+    }
+
+    public CacheProvider getRetrofitService() {
+        return mCacheProvider;
+    }
+}
+~~~
+
+##### 4.DataManager
+
+~~~java
+public class DataManager {
+
+    private static DataManager dataManager;
+    /**
+     * 未进行缓存的数据的接口
+     */
+    private RetrofitService retrofitService;
+    /**
+     * 进行缓存的数据的接口
+     */
+    private CacheProvider mCacheProvider;
+    private static Context mContext;
+
+    public static DataManager getInstance(Context context) {
+        mContext = context;
+        return dataManager == null ? dataManager = new DataManager() : dataManager;
+    }
+
+    /**
+     * 初始化Retrofit,拿到RetrofitService和CacheProvider
+     */
+    private DataManager() {
+        //未缓存数据的RetrofitService的实例化
+        retrofitService = RetrofitHelper.getInstance().getRetrofitService();
+        //缓存数据的CacheProvider的实例化
+        mCacheProvider = RetrofitCacheHelper.getInstance(mContext).getRetrofitService();
+    }
+
+
+    /************下边开始进行网络请求,在各自的presenter中调用各自的下边的网络请求的方法,在presenter中拿到Observable<javabean>*****************/
+
+
+    /**
+     * 获取快递信息(无缓存)
+     * @return Observable<ExpressInfo>
+     */
+    public Observable<ExpressInfo> getExpressInfo(Map<String,String> map) {
+        return retrofitService.getExpressInfoRx(map);
+    }
+
+    /**
+     * 获取快递信息(有缓存)
+     * @param map
+     * @param update 是否清除所有缓存
+     * @return Observable<ExpressInfo>
+     */
+    public Observable<ExpressInfo> getExpressCacheInfo(Map<String,String> map , boolean update) {
+        return mCacheProvider.getExpressInfoRx(retrofitService.getExpressInfoRx(map),new EvictProvider(update));
+    }
+}
+
+~~~
+
+然后,在getExpressCacheInfo调用getExpressCacheInfo方法就好了.
+
