@@ -50,7 +50,7 @@ public abstract class UserDatabase extends RoomDatabase {
     }
 
     /**
-     * 必须方法
+     * 必须有这个方法
      * @return
      */
     public abstract UserDao getUserDao();

@@ -8,6 +8,8 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+
 /**
  * ━━━━━━神兽出没━━━━━━
  * 　　　┏┓　　　┏┓
@@ -35,8 +37,21 @@ import java.util.List;
  */
 @Dao
 public interface  UserDao {
+
+    /**
+     * 传统方法
+     * @return
+     */
     @Query("SELECT * FROM user")
     List<User> getAllUsers();
+
+    /**
+     * rxjava结合room最简便写法(可以用Flowable,Single,Maybe,但是只有Flowable,在调用以后,数据库数据更新了,会自动更新前台数据)
+     *
+     * @return
+     */
+    @Query("SELECT * FROM user")
+    Flowable<List<User>> getAllUsersTwo();
 
     @Insert
     void insert(User... users);

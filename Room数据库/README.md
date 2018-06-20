@@ -10,10 +10,13 @@
 
 ##### 1.添加依赖(room和rxjava的依赖)
 
-~~~~xml
+~~~~java
     //room
-    implementation 'android.arch.persistence.room:runtime:1.0.0'
-    annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
+    implementation 'android.arch.persistence.room:runtime:1.1.0-beta2'
+    annotationProcessor 'android.arch.persistence.room:compiler:1.1.0-beta2'
+    // RxJava2对room的支持(如果要在UserDao中直接返回Flowable<>则必须添加此依赖)
+    //注意:版本号需要与room的版本号对应,即如下都为1.1.0-beta2
+    implementation 'android.arch.persistence.room:rxjava2:1.1.0-beta2'
     //rxjava
     implementation 'io.reactivex.rxjava2:rxjava:2.1.4'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
@@ -79,8 +82,20 @@ public class User {
 ~~~~java
 @Dao
 public interface  UserDao {
+    /**
+     * 传统方法
+     * @return
+     */
     @Query("SELECT * FROM user")
     List<User> getAllUsers();
+    
+    /**
+     * rxjava结合room最简便写法(可以用Flowable,Single,Maybe,但是只有Flowable,在调用以后,数据库数据更	    * 新了,会自动更新前台数据)
+     *
+     * @return
+     */
+    @Query("SELECT * FROM user")
+    Flowable<List<User>> getAllUsersTwo();
 
     @Insert
     void insert(User... users);
@@ -138,16 +153,19 @@ public abstract class UserDatabase extends RoomDatabase {
 #####5.使用
 
 ~~~~java
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView tv;
+    private TextView tv1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-		//开始存储数据
+
+        //开始存储数据
+        //传统写法
         Observable.create(new ObservableOnSubscribe<User>() {
             @Override
             public void subscribe(ObservableEmitter<User> emitter) throws Exception {
@@ -172,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(User user) {
+                        //这在主线程中操作
                         Toast.makeText(MainActivity.this, "存储完成了", Toast.LENGTH_SHORT).show();
                         Log.v("hao", "MainActivity onNext()");
                     }
@@ -186,24 +205,78 @@ public class MainActivity extends AppCompatActivity {
                         Log.v("hao", "MainActivity onComplete()");
                     }
                 });
+
     }
 
-    
     private void initView() {
         tv = (TextView) findViewById(R.id.tv);
-        tv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread() {
-                    public void run() {
+        tv1 = (TextView) findViewById(R.id.tv1);
+        tv.setOnClickListener(this);
+        tv1.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tv:
+                //传统写法
+                Observable.create(new ObservableOnSubscribe<List<User>>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<List<User>> emitter) throws Exception {
                         //对数据库操作必须在子线程中
                         List<User> allUsers = UserDatabase.getInstance(MainActivity.this)
                                 .getUserDao().getAllUsers();
-                        Log.v("hao", "MainActivity run(): " + allUsers.get(0).toString());
+                        //
+                        emitter.onNext(allUsers);
                     }
-                }.start();
-            }
-        });
+                }).subscribeOn(Schedulers.io()) //上边的被观察者在子线程执行操作
+                        .observeOn(AndroidSchedulers.mainThread()) //下边的观察者在主线程中执行操作
+                        .subscribe(new Observer<List<User>>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(List<User> users) {
+                                tv.setText(users.get(0).getName());
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+                break;
+            case R.id.tv1:
+                //rxjava和room结合的最简便写法
+                UserDatabase.getInstance(MainActivity.this).getUserDao().getAllUsersTwo()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new DefaultSubscriber<List<User>>() {
+                            @Override
+                            public void onNext(List<User> users) {
+                                tv1.setText(users.get(0).getAge()+"");
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+
+                break;
+        }
     }
 }
 ~~~~
