@@ -43,7 +43,7 @@ public class Event {
 
 ​	在需要发送消息的地方发送:
 
-~~~~
+~~~~java
  		Event event = new Event();
         event.setTopPosition(0);
         event.setBottomPosition(1);
