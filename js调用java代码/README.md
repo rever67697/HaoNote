@@ -13,7 +13,7 @@ webView.setWebViewClient(new webViewViewClient());
 写方法,注意方法需要加上`@JavascriptInterface`注解
 
 ~~~~java
- /**
+   /**
      * 注意:js调用java方法时会在一个私有的后台进程中,所以需要runOnUiThread
      */
     @JavascriptInterface
