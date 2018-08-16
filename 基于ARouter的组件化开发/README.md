@@ -59,6 +59,10 @@ public class MyApplication extends Application {
 }
 ~~~~
 
+注意: 假如我需要从app的moudle跳转到其他moudle, 需要把其他moudle依赖到app上边,如: `implementation project(':library')`.
+
+新建moudle的时候需要选第二个android library,才能添加到其他moudle上.
+
 ### 开始使用
 
 #### 简单跳转(不带参数)
