@@ -1,118 +1,369 @@
-package com.jingewenku.abrahamcaijin.commonutil;
+package com.xbkj.controller.util;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Rect;
+import android.os.Build;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import android.widget.FrameLayout;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.lang.reflect.Field;
 
 /**
- * 主要功能:软键盘管理
+ * ━━━━━━神兽出没━━━━━━
+ * 　　　┏┓　　　┏┓
+ * 　　┏┛┻━━━┛┻┓
+ * 　　┃　　　　　　　┃
+ * 　　┃　　　━　　　┃
+ * 　　┃　┳┛　┗┳　┃
+ * 　　┃　　　　　　　┃
+ * 　　┃　　　┻　　　┃
+ * 　　┃　　　　　　　┃
+ * 　　┗━┓　　　┏━┛
+ * 　　　　┃　　　┃  神兽保佑
+ * 　　　　┃　　　┃  代码无bug
+ * 　　　　┃　　　┗━━━┓
+ * 　　　　┃　　　　　　　┣┓
+ * 　　　　┃　　　　　　　┏┛
+ * 　　　　┗┓┓┏━┳┓┏┛
+ * 　　　　　┃┫┫　┃┫┫
+ * 　　　　　┗┻┛　┗┻┛
+ * ━━━━━━感觉萌萌哒━━━━━━
  *
- * @Prject: CommonUtilLibrary
- * @author: hao
- * 	method:
-			openKeybord      : 打卡软键盘
-			closeKeybord     : 关闭软键盘
-			TimerHideKeyboard: 通过定时器强制隐藏虚拟键盘
-			isKeybord        : 输入法是否显示
+ * @author hao
+ * @date 2018/09/07
+ * @description 软键盘
+ * showSoftInput                     : 显示软键盘
+ * showSoftInputUsingToggle          : 显示软键盘用 toggle
+ * hideSoftInput                     : 隐藏软键盘
+ * hideSoftInputUsingToggle          : 隐藏软键盘用 toggle
+ * toggleSoftInput                   : 切换键盘显示与否状态
+ * isSoftInputVisible                : 判断软键盘是否可见
+ * registerSoftInputChangedListener  : 注册软键盘改变监听器
+ * unregisterSoftInputChangedListener: 注销软键盘改变监听器
+ * fixAndroidBug5497                 : 修复安卓 5497 BUG
+ * fixSoftInputLeaks                 : 修复软键盘内存泄漏
+ * clickBlankArea2HideSoftInput      : 点击屏幕空白区域隐藏软键盘
  */
+public class KeyboardUtils {
 
-public class KeyBoardUtils {
-    /**
-     * 打卡软键盘
-     *
-     * @param mEditText  输入框
-     * @param mContext   上下文
-     */
-    public static void openKeybord(EditText mEditText, Context mContext)
-    {
-        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mEditText, InputMethodManager.RESULT_SHOWN);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+    private static int sDecorViewInvisibleHeightPre;
+    private static ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener;
+    private static OnSoftInputChangedListener onSoftInputChangedListener;
+    private static int sContentViewInvisibleHeightPre5497;
+
+    private KeyboardUtils(Context context) {
+        throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
     /**
-     * 关闭软键盘
+     * Show the soft input.
      *
-     * @param mEditText 输入框
-     * @param mContext  上下文
+     * @param activity The activity.
      */
-    public static void closeKeybord(EditText mEditText, Context mContext)
-    {
-        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+    public static void showSoftInput(final Activity activity) {
+        InputMethodManager imm =
+                (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+        }
+        imm.showSoftInput(view, InputMethodManager.SHOW_FORCED);
     }
 
     /**
-     * 通过定时器强制隐藏虚拟键盘
+     * Show the soft input.
+     *
+     * @param view The view.
      */
-    public static void TimerHideKeyboard(final View v) {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+    public static void showSoftInput(Context context, final View view) {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        view.setFocusable(true);
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        imm.showSoftInput(view, InputMethodManager.SHOW_FORCED);
+    }
+
+    /**
+     * Show the soft input using toggle.
+     *
+     * @param activity The activity.
+     */
+    public static void showSoftInputUsingToggle(Context context, final Activity activity) {
+        if (isSoftInputVisible(activity))
+            return;
+        toggleSoftInput(context);
+    }
+
+    /**
+     * Hide the soft input.
+     *
+     * @param activity The activity.
+     */
+    public static void hideSoftInput(final Activity activity) {
+        InputMethodManager imm =
+                (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        View view = activity.getCurrentFocus();
+        if (view == null)
+            view = new View(activity);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    /**
+     * Hide the soft input.
+     *
+     * @param view The view.
+     */
+    public static void hideSoftInput(Context context, final View view) {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    /**
+     * Hide the soft input.
+     *
+     * @param activity The activity.
+     */
+    public static void hideSoftInputUsingToggle(final Activity activity) {
+        if (!isSoftInputVisible(activity))
+            return;
+        toggleSoftInput(activity);
+    }
+
+    /**
+     * Toggle the soft input display or not.
+     */
+    public static void toggleSoftInput(Context context) {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    /**
+     * Return whether soft input is visible.
+     *
+     * @param activity The activity.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isSoftInputVisible(final Activity activity) {
+        return getDecorViewInvisibleHeight(activity) > 0;
+    }
+
+    private static int sDelta = 0;
+
+    private static int getDecorViewInvisibleHeight(final Activity activity) {
+        final View decorView = activity.getWindow().getDecorView();
+        final Rect outRect = new Rect();
+        decorView.getWindowVisibleDisplayFrame(outRect);
+
+        int delta = Math.abs(decorView.getBottom() - outRect.bottom);
+        if (delta <= getNavBarHeight()) {
+            sDelta = delta;
+            return 0;
+        }
+        return delta - sDelta;
+    }
+
+    /**
+     * Register soft input changed listener.
+     *
+     * @param activity The activity.
+     * @param listener The soft input changed listener.
+     */
+    public static void registerSoftInputChangedListener(final Activity activity,
+                                                        final OnSoftInputChangedListener listener) {
+        final int flags = activity.getWindow().getAttributes().flags;
+        if ((flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS) != 0) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+        final FrameLayout contentView = (FrameLayout) activity.findViewById(android.R.id.content);
+        sDecorViewInvisibleHeightPre = getDecorViewInvisibleHeight(activity);
+        onSoftInputChangedListener = listener;
+        onGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void run() {
-                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm.isActive()) {
-                    imm.hideSoftInputFromWindow(v.getApplicationWindowToken(),0);
+            public void onGlobalLayout() {
+                if (onSoftInputChangedListener != null) {
+                    int height = getDecorViewInvisibleHeight(activity);
+                    if (sDecorViewInvisibleHeightPre != height) {
+                        onSoftInputChangedListener.onSoftInputChanged(height);
+                        sDecorViewInvisibleHeightPre = height;
+                    }
                 }
             }
-        }, 10);
+        };
+        contentView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(onGlobalLayoutListener);
     }
 
     /**
-     * 输入法是否显示
+     * Unregister soft input changed listener.
+     *
+     * @param activity The activity.
      */
-    public static boolean KeyBoard(EditText edittext) {
-        boolean bool = false;
-        InputMethodManager imm = (InputMethodManager) edittext.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm.isActive()) {
-            bool = true;
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public static void unregisterSoftInputChangedListener(final Activity activity) {
+        final View contentView = activity.findViewById(android.R.id.content);
+        contentView.getViewTreeObserver().removeOnGlobalLayoutListener(onGlobalLayoutListener);
+        onSoftInputChangedListener = null;
+        onGlobalLayoutListener = null;
+    }
+
+    /**
+     * Fix the bug of 5497 in Android.
+     *
+     * @param activity The activity.
+     */
+    public static void fixAndroidBug5497(final Activity activity) {
+        final FrameLayout contentView = (FrameLayout) activity.findViewById(android.R.id.content);
+        final View contentViewChild = contentView.getChildAt(0);
+        final int paddingBottom = contentViewChild.getPaddingBottom();
+        sContentViewInvisibleHeightPre5497 = getContentViewInvisibleHeight(activity);
+        contentView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        int height = getContentViewInvisibleHeight(activity);
+                        if (sContentViewInvisibleHeightPre5497 != height) {
+                            contentViewChild.setPadding(
+                                    contentViewChild.getPaddingLeft(),
+                                    contentViewChild.getPaddingTop(),
+                                    contentViewChild.getPaddingRight(),
+                                    paddingBottom + height
+                            );
+                            sContentViewInvisibleHeightPre5497 = height;
+                        }
+                    }
+                });
+    }
+
+    private static int getContentViewInvisibleHeight(final Activity activity) {
+        final FrameLayout contentView = (FrameLayout) activity.findViewById(android.R.id.content);
+        final Rect outRect = new Rect();
+        contentView.getWindowVisibleDisplayFrame(outRect);
+        int delta = Math.abs(contentView.getBottom() - outRect.bottom);
+        if (delta <= getStatusBarHeight()) {
+            return 0;
         }
-        return bool;
-    }
-    /**
-     * 切换软键盘的状态
-     * 如当前为收起变为弹出,若当前为弹出变为收起
-     */
-    public static void toggleKeybord(EditText edittext) {
-        InputMethodManager inputMethodManager = (InputMethodManager)
-            edittext.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+        return delta;
     }
 
     /**
-     * 强制隐藏输入法键盘
+     * Fix the leaks of soft input.
+     * <p>Call the function in {@link Activity#onDestroy()}.</p>
+     *
+     * @param context The context.
      */
-    public static void hideKeybord(EditText edittext) {
-        InputMethodManager inputMethodManager = (InputMethodManager)
-            edittext.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (inputMethodManager.isActive()) {
-            inputMethodManager.hideSoftInputFromWindow(edittext.getWindowToken(), 0);
+    public static void fixSoftInputLeaks(final Context context) {
+        if (context == null)
+            return;
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return;
+        String[] strArr = new String[]{"mCurRootView", "mServedView", "mNextServedView", "mLastSrvView"};
+        for (int i = 0; i < 4; i++) {
+            try {
+                Field declaredField = imm.getClass().getDeclaredField(strArr[i]);
+                if (declaredField == null)
+                    continue;
+                if (!declaredField.isAccessible()) {
+                    declaredField.setAccessible(true);
+                }
+                Object obj = declaredField.get(imm);
+                if (obj == null || !(obj instanceof View))
+                    continue;
+                View view = (View) obj;
+                if (view.getContext() == context) {
+                    declaredField.set(imm, null);
+                } else {
+                    return;
+                }
+            } catch (Throwable th) {
+                th.printStackTrace();
+            }
         }
     }
 
     /**
-     * 强制显示输入法键盘
+     * Click blankj area to hide soft input.
+     * <p>Copy the following code in ur activity.</p>
      */
-    public static void showKeybord(EditText edittext) {
-        InputMethodManager inputMethodManager = (InputMethodManager)
-            edittext.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(edittext, InputMethodManager.SHOW_FORCED);
+    public static void clickBlankArea2HideSoftInput() {
+        Log.i("KeyboardUtils", "Please refer to the following code.");
+        /*
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                View v = getCurrentFocus();
+                if (isShouldHideKeyboard(v, ev)) {
+                    InputMethodManager imm =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS
+                    );
+                }
+            }
+            return super.dispatchTouchEvent(ev);
+        }
+        // Return whether touch the view.
+        private boolean isShouldHideKeyboard(View v, MotionEvent event) {
+            if (v != null && (v instanceof EditText)) {
+                int[] l = {0, 0};
+                v.getLocationInWindow(l);
+                int left = l[0],
+                        top = l[1],
+                        bottom = top + v.getHeight(),
+                        right = left + v.getWidth();
+                return !(event.getX() > left && event.getX() < right
+                        && event.getY() > top && event.getY() < bottom);
+            }
+            return false;
+        }
+        */
     }
 
-    /**
-     * 输入法是否显示
-     */
-    public static boolean isKeybord(EditText edittext) {
-        boolean bool = false;
-        InputMethodManager inputMethodManager = (InputMethodManager)
-            edittext.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (inputMethodManager.isActive()) {
-            bool = true;
+    private static int getStatusBarHeight() {
+        Resources resources = Resources.getSystem();
+        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        return resources.getDimensionPixelSize(resourceId);
+    }
+
+    private static int getNavBarHeight() {
+        Resources res = Resources.getSystem();
+        int resourceId = res.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId != 0) {
+            return res.getDimensionPixelSize(resourceId);
+        } else {
+            return 0;
         }
-        return bool;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // interface
+    ///////////////////////////////////////////////////////////////////////////
+
+    public interface OnSoftInputChangedListener {
+        void onSoftInputChanged(int height);
     }
 }
