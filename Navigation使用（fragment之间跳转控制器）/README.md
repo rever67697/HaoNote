@@ -102,7 +102,7 @@ Settings -> Experimental(最后一项) -> Enable Navigation Editor
 
 7.在fragment中添加：
 
-`MainFragment`
+`MainFragment.java`
 
 ~~~~JAVA
 public class MainFragment extends Fragment {
@@ -134,7 +134,7 @@ public class MainFragment extends Fragment {
 }
 ~~~~
 
-`TwoFragment`
+`TwoFragment.java`
 
 ~~~~JAVA
 public class TwoFragment extends Fragment {
