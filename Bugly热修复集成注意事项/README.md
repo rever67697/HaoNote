@@ -8,7 +8,7 @@
 
    ![2](C:\Users\Administrator\Desktop\HaoNote\Bugly热修复集成注意事项\2.png)
 
-   3. 打补丁的时候，
+   3.打补丁的时候，
 
    ~~~~java
    /**
