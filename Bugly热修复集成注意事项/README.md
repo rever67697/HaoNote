@@ -25,7 +25,7 @@
 
    tinkerId每次打补丁都要不一样，而且后边版本号要一样，和安卓包版本号一致。
 
-   4. 注意：打包之前一定要在app的build.gradle中加上签名配置信息，签名文件要放到默认位置，即app的文件夹下边，就是和`tinker-support.gradle`的文件在同一级目录，签名配置如下：
+   4.注意：打包之前一定要在app的build.gradle中加上签名配置信息，签名文件要放到默认位置，即app的文件夹下边，就是和`tinker-support.gradle`的文件在同一级目录，签名配置如下：
 
    ~~~~java
    android {
@@ -71,4 +71,4 @@
      }
    ~~~~
 
-   5. 安装包生成目录在`app\build\bakApk`中, 补丁的生成目录在`app\build\outputs\patch\release`中,补丁上传选择`patch_signed_7zip.apk`.
+   5.安装包生成目录在`app\build\bakApk`中, 补丁的生成目录在`app\build\outputs\patch\release`中,补丁上传选择`patch_signed_7zip.apk`.
