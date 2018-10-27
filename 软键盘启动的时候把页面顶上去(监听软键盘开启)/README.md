@@ -74,3 +74,18 @@ ImmersionBar.with(this).statusBarColor(R.color.status_bar).statusBarDarkFont(tru
                 .init();
 ~~~~
 
+另外一种使用沉浸式的方案就是:
+
+最外层布局设置属性:
+
+~~~~java
+android:fitsSystemWindows="true"
+~~~~
+
+然后mainfest.xml在此activity添加属性:
+
+~~~~java
+android:windowSoftInputMode="stateHidden|adjustResize"
+~~~~
+
+https://blog.csdn.net/smileiam/article/details/69055963
