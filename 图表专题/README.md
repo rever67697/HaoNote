@@ -1,14 +1,10 @@
-# 指定特定位置的圆点的显示
+##指定特定位置的圆点的显示
 
-
-
-## 先看效果图
+### 先看效果图
 
  ![1](1.png)
 
-
-
-## 源码修改
+### 源码修改
 
 我们知道，MPAndroidChart这个依赖库的图表的所有绘制都在renderer中，所有我们找到LineChartRender，找到drawCircles（）方法，这就是绘制圆点的方法，好了，现在开始修改。
 
@@ -190,11 +186,7 @@ public class LineCircleChart extends BarLineChartBase<LineData> implements 		  L
 
 demo源码位置：https://github.com/chinachance/ChartCubeDemo
 
-
-
-
-
-# 颜色渐变
+## 颜色渐变
 
  ![2](2.png)
 
@@ -209,5 +201,99 @@ demo源码位置：https://github.com/chinachance/ChartCubeDemo
                 Shader.TileMode.REPEAT);
         mRenderPaint.setShader(linearGradient);
         //修改-------end
+~~~~
+
+
+
+## 选中显示小圆点，并且修改高亮线
+
+
+
+![3](C:\Users\Administrator\Desktop\HaoNote\图表专题\3.png)
+
+修改后的文件为`LineUpdateHightLightChart`,`LineChartUpdateHightLightRenderer`,`LineRadarRendererTwo`,`LineScatterCandleRadarRendererTwo`
+
+然后引用线状图的时候用`LineUpdateHightLightChart`这个我们改好的chart，然后设置`setHighlightEnabled(true`)`,最后还需调用我们写好的`setCircleWidth()`方法，把小园的半径和橘色圆环的宽度传过去：
+
+~~~~java
+chart.setCircleWidth(DensityUtils.dip2px(this, 6), DensityUtils.dip2px(this, 2));
+~~~~
+
+
+
+
+
+## 其他属性
+
+~~~~java
+//屏幕最多展示x轴的数据为6个，其余的滑动显示
+lineChart.setVisibleXRange(0, 5);
+//图标数据最后一个的x值和y值
+float xChartMax = chart.getXChartMax();
+float yChartMax = chart.getYChartMax();
+//滑动到图表指定的位置-----这样设置，指定的位置会滑动到图表能看到的位置的最右边
+lineChart.moveViewTo(xChartMax, yChartMax, YAxis.AxisDependency.LEFT);
+//滑动到图表指定的位置-----这样设置，指定的位置会滑动到图表能看到的位置的最左边
+lineChart.moveViewToX(xChartMax);
+//设置x轴数据左右的偏移量(图表左右显示不全时使用)
+lineChart.setDragOffsetX(6f);
+
+//设置x轴第一个数据和最好一个数据加上边距
+xAxis.setAvoidFirstLastClipping(true);
+
+//图表监听
+lineChart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+                Log.v("hao", "SaleManMonthStaticActivity onChartGestureStart()");
+            }
+
+            @Override
+            public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+
+            }
+
+            @Override
+            public void onChartLongPressed(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+                Log.v("hao", "SaleManMonthStaticActivity onChartFling()");
+            }
+
+            @Override
+            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+
+            }
+
+            @Override
+            public void onChartTranslate(MotionEvent me, float dX, float dY) {
+                Log.v("hao", "SaleManMonthStaticActivity onChartTranslate()");
+            }
+        });
+~~~~
+
+自定义Markview监听，在自定义的Markview的`refreshContent()`方法中：
+
+~~~~java
+	    @Override
+        public void refreshContent(Entry e, Highlight highlight) {
+            if (e != null) {
+                EventBus.getDefault().post(new ChartSelectEvent((int) e.getX()));
+            }
+            super.refreshContent(e, highlight);
+        }
 ~~~~
 
