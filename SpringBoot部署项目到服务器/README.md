@@ -29,3 +29,12 @@ $ nohup java -jar test.jar >temp.txt &
 其中test.jar是jar包名。
 
 然后访问 ：  服务器地址：在`application.properties`中配置的端口号/... 就可以了。
+
+
+
+**注意：服务器重新启动，需要重新部署一下项目，即重新执行一下命令：**
+
+~~~~
+$ nohup java -jar test.jar >temp.txt &
+~~~~
+
