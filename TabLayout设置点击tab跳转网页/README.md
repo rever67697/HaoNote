@@ -84,18 +84,22 @@ mTablayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 最后，我们在监听中手动控制tab的切换就好了。
 
 ~~~~java
+private int mSelectPos;
 mTablayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                //把直接记录的tab选中的位置设置为未选中（不写，会出现同时有两个tab选中的情况）
-                View preView1 = mTablayout.getTabAt(mSelectPos).getCustomView();
-                ImageView preImageView1 = (ImageView) preView1.findViewById(R.id.imageview);
-                TextView preTextView1 = (TextView) preView1.findViewById(R.id.textview);
-                preImageView1.setSelected(false);
-                preTextView1.setSelected(false);
+                //判断tab.getPosition() != mSelectPos是因为，点击第二个tab跳转网页之后，再点击现在显示的tab,会变成未选中
+                if (tab.getPosition() != mSelectPos) {
+                    //把直接记录的tab选中的位置设置为未选中（不写，会出现同时有两个tab选中的情况）
+                    View preView1 = mTablayout.getTabAt(mSelectPos).getCustomView();
+                    ImageView preImageView1 = (ImageView) preView1.findViewById(R.id.imageview);
+                    TextView preTextView1 = (TextView) preView1.findViewById(R.id.textview);
+                    preImageView1.setSelected(false);
+                    preTextView1.setSelected(false);
+                }
 
                 if (tab.getPosition() == 0) {
-                    rootViewPager.setCurrentItem(0,true);
+                    mViewPager.setCurrentItem(0,true);
                     mSelectPos = 0;
                 }
 
@@ -107,7 +111,7 @@ mTablayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                     TextView textView = (TextView) customView.findViewById(R.id.textview);
                     imageView.setSelected(false);
                     textView.setSelected(false);
-                    //设置前一个tab为选中 
+                    //设置前一个tab为选中
                     View preView = mTablayout.getTabAt(mSelectPos).getCustomView();
                     ImageView preImageView = (ImageView) preView.findViewById(R.id.imageview);
                     TextView preTextView = (TextView) preView.findViewById(R.id.textview);
@@ -116,11 +120,11 @@ mTablayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 }
 
                 if (tab.getPosition() == 2) {
-                    rootViewPager.setCurrentItem(2,true);
+                    mViewPager.setCurrentItem(2,true);
                     mSelectPos = 2;
                 }
                 if (tab.getPosition() == 3) {
-                    rootViewPager.setCurrentItem(3,true);
+                    mViewPager.setCurrentItem(3,true);
                     mSelectPos = 3;
                 }
 
@@ -132,7 +136,10 @@ mTablayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
+                if (tab.getPosition() == 1) {
+                    //再次点击时的跳转操作
+                    startActivity(new Intent(MainTwoActivity.this, WebActivity.class));
+                }
             }
         });
 ~~~~
