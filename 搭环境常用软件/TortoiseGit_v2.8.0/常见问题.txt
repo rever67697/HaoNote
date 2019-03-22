@@ -1,0 +1,2 @@
+如果出现不能访问,修改如下:
+TortoiseGit > Settings ... Network ... SSH Client: C:\Program Files\Git\usr\bin\ssh.exe
