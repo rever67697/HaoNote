@@ -131,3 +131,70 @@ class MyApp extends StatelessWidget {
    ~~~~
 
    注意:参数的值需要使用`Uri.encodeComponent()`方法调用一下,要不会报错.
+   
+   注意：路由跳转都是进栈操作，原有页面没有销毁。如果想跳转时同时销毁页面，可用原生的路由跳转方法：
+   
+   ~~~~java
+   Navigator.of(context).pushAndRemoveUntil(
+               MaterialPageRoute(builder: (context) => HomePage()),
+                   (route) => route == null);
+   ~~~~
+   
+   ## 路由执行startActivityForResult相似操作
+   
+   在跳转后边加`then`操作，`then`未跳转的页面销毁之后，回调执行的方法。
+   
+   ~~~~java
+   Application.router.navigateTo(context,
+                 '${Routes.web}?title=${Uri.encodeComponent(itemTitle)}&url=${Uri
+                     .encodeComponent(itemUrl)}',
+                 transition: TransitionType.fadeIn).then((result){
+                   if(result == "key"){
+                     //执行func路由,func路由为弹出弹窗
+                     Application.router.navigateTo(context, "/demo/func?message=$result");
+                   }
+             });
+   ~~~~
+   
+   
+   
+   在跳转到的web页面要销毁时，执行`Navigator.pop(context, 'key');`方法.然后就会调用上边代码中的`then`方法了。
+   
+   `func`路由的`handler`如下：
+   
+   ~~~~java
+   var demoFunctionHandler = new Handler(
+       type: HandlerType.function,
+       handlerFunc: (BuildContext context, Map<String, List<String>> params) {
+         String message = params["message"]?.first;
+         showDialog(
+           context: context,
+           builder: (context) {
+             return new AlertDialog(
+               title: new Text(
+                 "Hey Hey!",
+                 style: new TextStyle(
+                   color: const Color(0xFF00D6F7),
+                   fontFamily: "Lazer84",
+                   fontSize: 22.0,
+                 ),
+               ),
+               content: new Text("$message"),
+               actions: <Widget>[
+                 new Padding(
+                   padding: new EdgeInsets.only(bottom: 8.0, right: 8.0),
+                   child: new FlatButton(
+                     onPressed: () {
+                       Navigator.of(context).pop(true);
+                     },
+                     child: new Text("OK"),
+                   ),
+                 ),
+               ],
+             );
+           },
+         );
+       });
+   ~~~~
+   
+   
