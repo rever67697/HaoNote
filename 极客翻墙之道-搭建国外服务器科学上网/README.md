@@ -152,6 +152,21 @@ git clone https://github.com/flyzy2005/ss-fly
 
 ![14](C:\Users\Administrator\Desktop\HaoNote\极客翻墙之道-搭建国外服务器科学上网\14.png)
 
+注意:如果下载的文件夹为空或者没有脚本(可能作者已删库),可用以下方法:
+
+~~~~java
+apt-get install python-pip
+pip install shadowsocks
+~~~~
+
+或者
+
+~~~~java
+sudo easy_install shadowsocks
+~~~~
+
+
+
 2.运行搭建ss脚本代码 
 
 ~~~~java
