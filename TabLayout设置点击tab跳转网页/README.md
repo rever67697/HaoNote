@@ -1,6 +1,6 @@
 # TabLayout设置点击tab跳转网页
 
-![1](C:\Users\Administrator\Desktop\HaoNote\TabLayout设置点击tab跳转网页\1.gif)
+![1](C:\Users\dell\Desktop\HaoNote\TabLayout设置点击tab跳转网页\1.gif)
 
 实现效果：点击到某个tab，跳转到网页，网页返回的时候，tab选中的为上次选中的那个tab。
 
