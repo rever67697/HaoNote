@@ -6,7 +6,7 @@
 
 ~~~~dart
 #路由跳转
-  fluro: ^1.4.0
+  fluro: ^1.5.0
 ~~~~
 
 ## 新建相关文件
@@ -198,3 +198,60 @@ class MyApp extends StatelessWidget {
    ~~~~
    
    
+
+## 封装Navigator工具类使用
+
+封装工具类`NavigatorUtil`
+
+~~~~dart
+import 'package:fluro/fluro.dart';
+import 'package:flutter/material.dart';
+import 'application.dart';
+import 'routers.dart';
+
+/// fluro的路由跳转工具类
+class NavigatorUtils {
+  
+  ///replace为false表示跳转页面之后不销毁该页面
+  static push(BuildContext context, String path,
+      {bool replace = false, bool clearStack = false}) {
+    Application.router.navigateTo(context, path, replace: replace, clearStack: clearStack, transition: TransitionType.native);
+  }
+
+  static pushResult(BuildContext context, String path, Function(Object) function,
+      {bool replace = false, bool clearStack = false}) {
+    Application.router.navigateTo(context, path, replace: replace, clearStack: clearStack, transition: TransitionType.native).then((result){
+      // 页面返回result为null
+      if (result == null){
+        return;
+      }
+      function(result);
+    }).catchError((error) {
+      print("$error");
+    });
+  }
+
+  /// 返回
+  static void goBack(BuildContext context) {
+    Navigator.pop(context);
+  }
+
+  /// 带参数返回
+  static void goBackWithParams(BuildContext context, result) {
+    Navigator.pop(context, result);
+  }
+  
+  /// 跳到WebView页
+  static goWebViewPage(BuildContext context, String title, String url){
+    //fluro 不支持传中文,需转换
+    push(context, '${Routes.web}?title=${Uri.encodeComponent(title)}&url=${Uri.encodeComponent(url)}');
+  }
+}
+~~~~
+
+使用则为:
+
+~~~~dart
+NavigatorUtils.push(context, Routes.home, replace: true);
+~~~~
+
