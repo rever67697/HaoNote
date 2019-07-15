@@ -9,3 +9,19 @@
 
    
 
+2.如果要在点击事件中改变控件的属性,需要添加`setState`监听.
+
+~~~~dart
+bool _selectTwo = false;
+new IconButton(
+                  color: Colors.blue,
+                  icon: _selectTwo ? new Icon(Icons.search, size: 30) : new 		                             Icon(Icons.ac_unit, size: 30),
+                  onPressed: () {
+                    _selectIndex = 1;
+                    setState(() {
+                      _selectOne = false;
+                      _selectTwo = true;
+                    });
+                  }),
+~~~~
+
