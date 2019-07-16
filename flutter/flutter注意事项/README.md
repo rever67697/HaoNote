@@ -25,3 +25,16 @@ new IconButton(
                   }),
 ~~~~
 
+
+
+3.资源文件,需要在`pubspec.yaml`中定义文件夹路径，再使用。
+
+~~~~dart
+flutter:
+	assets:
+    #注意:资源文件夹里边如果有文件夹,都需要加上,不加会加载不到资源
+    - assets/images/
+    - assets/images/banner/
+~~~~
+
+上述代码，由于image文件夹中还有一个banner文件夹,banner文件夹中也有资源文件,所以都需要指明.
