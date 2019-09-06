@@ -2,11 +2,11 @@
 
 1.**1.3.1及以上版本** 不用再配置**AndroidManifest** 。
 
-2.打包执行命令：![1](C:\Users\Administrator\Desktop\HaoNote\Bugly热修复集成注意事项\1.png)
+2.打包执行命令：![1](1.png)
 
 打补丁执行命令：
 
-![2](C:\Users\Administrator\Desktop\HaoNote\Bugly热修复集成注意事项\2.png)
+![2](2.png)
 
 
 
