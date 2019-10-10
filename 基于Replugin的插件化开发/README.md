@@ -55,6 +55,13 @@ repluginHostConfig {
  applicationId "com.example.administrator.replugindemo"
 ~~~~
 
+在`baseApplication`中继承:
+
+~~~~java
+public class MainApplication extends RePluginApplication {
+}
+~~~~
+
 
 
 ### 添加插件项目的依赖
@@ -84,7 +91,7 @@ dependencies {
 
 然后就可以把插件打包使用了.
 
-
+​	
 
 ## 简单使用
 
