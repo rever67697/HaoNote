@@ -1,10 +1,10 @@
-#基于Replugin的插件化开发
+# 基于Replugin的插件化开发
 
 [TOC]
 
-##添加依赖
+## 添加依赖
 
-###添加宿主项目的依赖
+### 添加宿主项目的依赖
 
 在**项目根目录**的 build.gradle 中添加:
 
@@ -185,3 +185,19 @@ RePlugin.startActivity(MainActivity.this, intent);
 ~~~~
 
 其中createIntent()方法中,第一个参数表示要跳转的插件的包名,第二个参数表示要跳转的类名(包名+类名).
+
+# 注意
+
+1.打包的时候可能出现问题:
+
+![1](C:\Users\dell\Desktop\HaoNote\基于Replugin的插件化开发\1.png)
+
+但是点击左边看message详情的时候:
+
+![2](C:\Users\dell\Desktop\HaoNote\基于Replugin的插件化开发\2.png)
+
+显示成功了,而且安装包可以安装运行.
+
+这是因为打包的时候生成的`output.json`冲突导致的,在打包的时候,把apk文件的输出目录换到非该项目路径就好了,如:可以放到C盘,D盘下:
+
+![3](C:\Users\dell\Desktop\HaoNote\基于Replugin的插件化开发\3.png)
