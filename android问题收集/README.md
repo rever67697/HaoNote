@@ -38,5 +38,6 @@ gradle改为了4.4.
 
 ![2](C:\Users\dell\Desktop\HaoNote\android问题收集\2.png)
 
-这是因为打包的时候生成的`output.json`冲突导致的,在打包的时候,把apk文件的输出目录换到非该项目路径就好了,如:可![4](C:\Users\dell\Desktop\HaoNote\android问题收集\4.png)以放到C盘,D盘下:
+这是因为打包的时候生成的`output.json`冲突导致的,在打包的时候,把apk文件的输出目录换到非该项目路径就好了,如:可以放到C盘,D盘下:
 
+![3](C:\Users\dell\Desktop\HaoNote\android问题收集\3.png)
