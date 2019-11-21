@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)https://cokebar.info/archives/767 -->
+<html lang="zh-CN" data-blockbyte-bs-uid="60363"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>
+		Shadowsocks - libev 服务端的部署 - 飞羽博客	</title>
+	<link rel="profile" href="http://gmpg.org/xfn/11">
+	<link rel="pingback" href="https://cokebar.info/xmlrpc.php">	
+
+<!-- This site is optimized with the Yoast SEO plugin v11.0 - https://yoast.com/wordpress/plugins/seo/ -->
+<link rel="canonical" href="https://cokebar.info/archives/767">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="在VPS上部署shadowsocks，推荐使用C语言编写的基于libev的sha…">
+<meta name="twitter:title" content="Shadowsocks - libev 服务端的部署 - 飞羽博客">
+<meta name="twitter:site" content="@icokebar">
+<meta name="twitter:creator" content="@icokebar">
+<script type="text/javascript" async="" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/cc.js.下载"></script><script type="text/javascript" async="" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/linkid.js.下载"></script><script async="" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/analytics.js.下载"></script><script type="application/ld+json" class="yoast-schema-graph yoast-schema-graph--main">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://cokebar.info/#person","name":"cokebar","image":{"@type":"ImageObject","@id":"https://cokebar.info/#personlogo","url":"https://cokebar.info/wp-content/uploads/2014/02/gokou-ruri-e1418037598195.jpg","caption":"cokebar"},"sameAs":[]},{"@type":"WebSite","@id":"https://cokebar.info/#website","url":"https://cokebar.info/","name":"\u98de\u7fbd\u535a\u5ba2","publisher":{"@id":"https://cokebar.info/#person"},"potentialAction":{"@type":"SearchAction","target":"https://cokebar.info/?s={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"WebPage","@id":"https://cokebar.info/archives/767#webpage","url":"https://cokebar.info/archives/767","inLanguage":"zh-CN","name":"Shadowsocks - libev \u670d\u52a1\u7aef\u7684\u90e8\u7f72 - \u98de\u7fbd\u535a\u5ba2","isPartOf":{"@id":"https://cokebar.info/#website"},"datePublished":"2014-11-27T06:39:50+00:00","dateModified":"2019-06-25T01:42:58+00:00"},{"@type":"Article","@id":"https://cokebar.info/archives/767#article","isPartOf":{"@id":"https://cokebar.info/archives/767#webpage"},"author":{"@id":"https://cokebar.info/#person","name":"cokebar"},"publisher":{"@id":"https://cokebar.info/#person"},"headline":"Shadowsocks &#8211; libev \u670d\u52a1\u7aef\u7684\u90e8\u7f72","datePublished":"2014-11-27T06:39:50+00:00","dateModified":"2019-06-25T01:42:58+00:00","commentCount":"67","mainEntityOfPage":"https://cokebar.info/archives/767#webpage","keywords":"shadowsocks-libev,ss-server","articleSection":"Linux,\u63a2\u7d22\u4e16\u754c"}]}</script>
+<!-- / Yoast SEO plugin. -->
+
+<link rel="alternate" type="application/rss+xml" title="飞羽博客 » Feed" href="https://cokebar.info/feed">
+<link rel="alternate" type="application/rss+xml" title="飞羽博客 » 评论Feed" href="https://cokebar.info/comments/feed">
+<link rel="alternate" type="application/rss+xml" title="飞羽博客 » Shadowsocks – libev 服务端的部署评论Feed" href="https://cokebar.info/archives/767/feed">
+<link rel="stylesheet" id="wp-block-library-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/style.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="cptch_stylesheet-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/front_end_style.css" type="text/css" media="all">
+<link rel="stylesheet" id="dashicons-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/dashicons.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="cptch_desktop_style-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/desktop_style.css" type="text/css" media="all">
+<link rel="stylesheet" id="swiftype-facets-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/facets.css" type="text/css" media="all">
+<link rel="stylesheet" id="travelify_style-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/style.css" type="text/css" media="all">
+<link rel="stylesheet" id="swiftype-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/autocomplete.css" type="text/css" media="all">
+<script type="text/javascript">
+/* <![CDATA[ */
+var swiftypeParams = {"engineKey":"dyNS51kVm1TM9nXr-z71"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/install_swiftype.min.js.下载"></script>
+<link rel="https://api.w.org/" href="https://cokebar.info/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://cokebar.info/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://cokebar.info/wp-includes/wlwmanifest.xml"> 
+<meta name="generator" content="WordPress 5.1.3">
+<link rel="shortlink" href="https://cokebar.info/?p=767">
+<link rel="alternate" type="application/json+oembed" href="https://cokebar.info/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fcokebar.info%2Farchives%2F767">
+<link rel="alternate" type="text/xml+oembed" href="https://cokebar.info/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fcokebar.info%2Farchives%2F767&amp;format=xml">
+<!-- 飞羽博客 Custom CSS Styles -->
+<style type="text/css" media="screen">
+body { background-image: none; }
+</style>
+<style type="text/css"> a{color: ;}#site-title a{color: ;}#site-title a:hover{color: ;}.wrapper{background-color: ;}.social-icons ul li a{color: ;}#main-nav a, #main-nav a:hover,#main-nav ul li.current-menu-item a,#main-nav ul li.current_page_ancestor a,#main-nav ul li.current-menu-ancestor a,#main-nav ul li.current_page_item a,#main-nav ul li:hover > a{color: ;}.widget, article{background-color: ;}.entry-title, .entry-title a, h1, h2, h3, h4, h5, h6, .widget-title{color: ;}a:focus, a:active, a:hover, .tags a:hover, .custom-gallery-title a, .widget-title a, #content ul a:hover,#content ol a:hover, .widget ul li a:hover, .entry-title a:hover, .entry-meta a:hover, #site-generator .copyright a:hover{color: ;}#main-nav{background-color: ; border-color: ;}#main-nav ul li ul, body{border-color: ;}#main-nav a:hover,#main-nav ul li.current-menu-item a,#main-nav ul li.current_page_ancestor a,#main-nav ul li.current-menu-ancestor a,#main-nav ul li.current_page_item a,#main-nav ul li:hover > a, #main-nav li:hover > a,#main-nav ul ul :hover > a,#main-nav a:focus{background-color: ;}#main-nav ul li ul li a:hover,#main-nav ul li ul li:hover > a,#main-nav ul li.current-menu-item ul li a:hover{color: ;}.entry-content{color: ;}input[type="reset"], input[type="button"], input[type="submit"], a.readmore, ::selection, #controllers a:hover, #controllers a.active, .pagination span, .pagination a:hover span{background-color: ; border-color: }blockquote{border-color: }#controllers a:hover, #controllers a.active{color: }input[type="reset"]:hover,input[type="button"]:hover,input[type="submit"]:hover,input[type="reset"]:active,input[type="button"]:active,input[type="submit"]:active, a.readmore:hover, a.readmore:active, ul.default-wp-page li a:hover, ul.default-wp-page li a:active{background-color: ; border-color: }</style>
+    		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		<style type="text/css" id="custom-background-css">
+body.custom-background { background-image: url("https://cokebar.info/wp-content/themes/travelify-mod/images/background.png"); background-position: left top; background-size: auto; background-repeat: repeat; background-attachment: scroll; }
+</style>
+	
+<style class="blockbyte-bs-style" data-name="content">body>div#blockbyte-bs-indicator>div{opacity:0;pointer-events:none}body>iframe#blockbyte-bs-sidebar.blockbyte-bs-visible,body>iframe#blockbyte-bs-overlay.blockbyte-bs-visible{opacity:1;pointer-events:auto}body.blockbyte-bs-noscroll{overflow:hidden !important}body>div#blockbyte-bs-indicator>div{position:absolute;transform:translate3d(-40px, 0, 0);top:0;left:0;width:40px !important;height:100%;background:rgba(0,0,0,0.5);border-radius:0 10px 10px 0;transition:opacity 0.3s, transform 0.3s;z-index:2}body>div#blockbyte-bs-indicator>div>span{-webkit-mask:no-repeat center/32px;-webkit-mask-image:url(chrome-extension://jdbnofccmhefkmjbkkdkfiicjkgofkdh/img/icon-bookmark.svg);background-color:#ffffff;position:absolute;display:block;top:0;left:0;width:100%;height:100%}body>div#blockbyte-bs-indicator[data-pos='right']{left:auto;right:0}body>div#blockbyte-bs-indicator[data-pos='right']>div{transform:translate3d(40px, 0, 0);left:auto;right:0;border-radius:10px 0 0 10px}body>div#blockbyte-bs-indicator.blockbyte-bs-fullHeight>div{border-radius:0}body>div#blockbyte-bs-indicator.blockbyte-bs-hover>div{transform:translate3d(0, 0, 0);opacity:1}body>div#blockbyte-bs-indicator[data-pos='left'].blockbyte-bs-has-lsb{height:100% !important;top:0 !important}body>div#blockbyte-bs-indicator[data-pos='left'].blockbyte-bs-has-lsb>div{background:transparent}body>div#blockbyte-bs-indicator[data-pos='left'].blockbyte-bs-has-lsb>div>span{-webkit-mask-position-y:20px}body>iframe#blockbyte-bs-sidebar{width:350px;max-width:none;height:0;z-index:2147483646;background-color:rgba(255,255,255,0.8) !important;border:none;display:block !important;transform:translate3d(-350px, 0, 0);will-change:width, height, opacity, transform;transition:width 0s 0.3s, height 0s 0.3s, opacity 0.3s, transform 0.3s}body>iframe#blockbyte-bs-sidebar[data-pos='right']{left:auto;right:0;transform:translate3d(350px, 0, 0)}body>iframe#blockbyte-bs-sidebar.blockbyte-bs-visible{width:calc(100% + 350px);height:100%;transform:translate3d(0, 0, 0);transition:opacity 0.3s, transform 0.3s}body>iframe#blockbyte-bs-sidebar.blockbyte-bs-hideMask{background:none !important}body>iframe#blockbyte-bs-sidebar.blockbyte-bs-hideMask:not(.blockbyte-bs-hover){width:calc(350px + 50px)}body>iframe#blockbyte-bs-overlay{width:100%;max-width:none;height:100%;z-index:2147483647;border:none;background:rgba(0,0,0,0.5) !important;transition:opacity 0.3s}
+</style></head>
+
+<body class="post-template-default single single-post postid-767 single-format-standard custom-background " style="">
+	
+	<div class="wrapper">
+				<header id="branding">
+				
+	<div class="container clearfix">
+		<div class="hgroup-wrap clearfix">
+					<section class="hgroup-right">
+						
+			<div class="social-icons clearfix">
+				<ul><li class="twitter"><a href="https://twitter.com/icokebar" title="飞羽博客 on Twitter" target="_blank"></a></li><li class="rss"><a href="https://cokebar.info/feed/" title="飞羽博客 on RSS" target="_blank"></a></li>
+			</ul>
+			</div><!-- .social-icons -->					</section><!-- .hgroup-right -->	
+				<hgroup id="site-logo" class="clearfix">
+												<h1 id="site-title"> 
+								<a href="https://cokebar.info/" title="飞羽博客" rel="home">
+									飞羽博客								</a>
+							</h1>
+							<h2 id="site-description">一个专注于IT互联网的博客</h2>
+											
+				</hgroup><!-- #site-logo -->
+			
+		</div><!-- .hgroup-wrap -->
+	</div><!-- .container -->	
+		
+	<nav id="main-nav" class="clearfix">
+					<div class="container clearfix"><ul class="root l_tinynav1"><li id="menu-item-269" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-269"><a href="https://cokebar.info/">首页</a></li>
+<li id="menu-item-273" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor menu-item-273"><a href="https://cokebar.info/internet">互联网</a></li>
+<li id="menu-item-275" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor menu-item-275"><a href="https://cokebar.info/software">软件</a></li>
+<li id="menu-item-272" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-272"><a href="https://cokebar.info/it-industry">IT业界</a></li>
+<li id="menu-item-274" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-274"><a href="https://cokebar.info/program">编程</a></li>
+<li id="menu-item-1184" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1184"><a href="https://cokebar.info/app_share">实用工具</a></li>
+<li id="menu-item-270" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-270"><a href="https://cokebar.info/about">关于本站</a></li>
+<li class="default-menu"><a href="https://cokebar.info/" title="Navigation">导航</a></li></ul><select class="tinynav tinynav1"><option value="//cokebar.info/">首页</option><option value="https://cokebar.info/internet">互联网</option><option value="https://cokebar.info/software">软件</option><option value="https://cokebar.info/it-industry">IT业界</option><option value="https://cokebar.info/program">编程</option><option value="https://cokebar.info/app_share">实用工具</option><option value="https://cokebar.info/about">关于本站</option><option value="https://cokebar.info" selected="selected">导航</option></select></div><!-- .container -->
+					</nav><!-- #main-nav --> 		
+				</header>
+				<div id="main" class="container clearfix">
+
+
+<div id="container">
+	
+
+<div id="primary" class="no-margin-left">
+   <div id="content">	<section id="post-767" class="post-767 post type-post status-publish format-standard hentry category-linux category-explore-the-world tag-shadowsocks-libev tag-ss-server">
+		<article itemscope="" itemtype="http://schema.org/Article">
+
+			
+			<header class="entry-header">
+    			<h2 itemprop="name" class="entry-title">
+    				Shadowsocks – libev 服务端的部署    			</h2><!-- .entry-title -->
+  		</header>
+
+  		
+  		
+  			<div class="entry-meta-bar clearfix">
+    			<div class="entry-meta">
+	    				<span itemprop="author" class="vcard author"><a class="fn url" href="https://cokebar.info/archives/author/cokebar">cokebar</a></span>
+					<span itemprop="datePublished" class="date published"><a href="https://cokebar.info/archives/767" rel="bookmark">2014-11-27 14:39</a></span>
+	    				<span itemprop="dateModified" class="date updated"><a href="https://cokebar.info/archives/767" rel="bookmark">2019-06-25 9:42</a></span>
+	    					             		<span itemprop="articleSection" class="category"><a href="https://cokebar.info/software/linux" rel="category tag">Linux</a>, <a href="https://cokebar.info/internet/explore-the-world" rel="category tag">探索世界</a></span>
+	             		    					             		<span class="comments"><a href="https://cokebar.info/archives/767#comments">67 条评论</a></span>
+	             	    			</div><!-- .entry-meta -->
+    		</div>
+
+				
+				
+  			<div itemprop="articleBody" class="entry-content clearfix">
+    			<p>在VPS上部署shadowsocks，推荐使用C语言编写的基于libev的shadowsocks-libev的服务端。下面介绍在Linux系统的VPS上安装并配置的方法。Linux请采用近期的发行版，不要过老。本文基本是照着github上的readme翻译的，给那些英文苦手一点帮助。本篇只提供部分安装方法，其他方式请参考github上原repo的readme。</p>
+<p>由于shadowsocks-libev变动频繁，请以shadowsocks-libev的Github页面的readme为准，如有问题可至issue页面查找有无类似问题，或者发issue提问：</p>
+<p><a href="https://github.com/shadowsocks/shadowsocks-libev" target="_blank" rel="noopener noreferrer">https://github.com/shadowsocks/shadowsocks-libev</a></p>
+<p><strong><span style="color: #ff0000;">如果您还未购买将要购买国外VPS搭建shadowsocks，这里为您推荐几家VPS提供商，详情见</span><a href="https://cokebar.info/about/" target="_blank" rel="noopener noreferrer">《关于本站》</a><span style="color: #ff0000;">页面。</span></strong></p>
+<h6>一、安装shadowsocks服务端</h6>
+<p><strong>方法1. APT从repo安装。</strong></p>
+<p>Ubuntu 14.04/16.04 版本需要先添加作者的PPA：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bea1085902957" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">sudo apt-get install software-properties-common	 	 
+sudo add-apt-repository ppa:max-c-lv/shadowsocks-libev</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bea1085902957-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bea1085902957-2">2</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bea1085902957-1"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-r">get</span><span class="crayon-h"> </span><span class="crayon-e">install </span><span class="crayon-v">software</span><span class="crayon-o">-</span><span class="crayon-v">properties</span><span class="crayon-o">-</span><span class="crayon-e">common	 	 </span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bea1085902957-2"><span class="crayon-e">sudo </span><span class="crayon-v">add</span><span class="crayon-o">-</span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-e">repository </span><span class="crayon-v">ppa</span><span class="crayon-o">:</span><span class="crayon-v">max</span><span class="crayon-o">-</span><span class="crayon-v">c</span><span class="crayon-o">-</span><span class="crayon-v">lv</span><span class="crayon-o">/</span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+Ubuntu 16.10及以上版本则可以直接从Ubuntu的官方repo安装，无需上述步骤。</p>
+<p>接下来更新软件列表并安装即可。</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bead087397254" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">sudo apt-get update
+sudo apt-get install shadowsocks-libev</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bead087397254-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bead087397254-2">2</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bead087397254-1"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-r">get</span><span class="crayon-h"> </span><span class="crayon-e">update</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bead087397254-2"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-r">get</span><span class="crayon-h"> </span><span class="crayon-e">install </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+<strong>方法2. 使用脚本自动编译deb安装，适用于Debian (&gt;=8) / Ubuntu 14.04 (Trusty) / 16.04 (Xenial) / 16.10 / Higher</strong></p>
+<p>（会自动编译安装所有依赖包，并同时安装simpleobfs plugin）</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb0917720986" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">mkdir ./build-area
+cd build-area
+wget https://github.com/shadowsocks/shadowsocks-libev/raw/master/scripts/build_deb.sh
+chmod +x build_deb.sh
+./build_deb.sh all</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb0917720986-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb0917720986-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb0917720986-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb0917720986-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8beb0917720986-5">5</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb0917720986-1"><span class="crayon-r">mkdir</span><span class="crayon-h"> </span><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">build</span><span class="crayon-o">-</span><span class="crayon-e">area</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb0917720986-2"><span class="crayon-r">cd</span><span class="crayon-h"> </span><span class="crayon-v">build</span><span class="crayon-o">-</span><span class="crayon-e">area</span></div><div class="crayon-line" id="crayon-5dd647bb8beb0917720986-3"><span class="crayon-e">wget </span><span class="crayon-v">https</span><span class="crayon-o">:</span><span class="crayon-o">/</span><span class="crayon-o">/</span><span class="crayon-v">github</span><span class="crayon-e">.com</span><span class="crayon-o">/</span><span class="crayon-v">shadowsocks</span><span class="crayon-o">/</span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span><span class="crayon-o">/</span><span class="crayon-v">raw</span><span class="crayon-o">/</span><span class="crayon-v">master</span><span class="crayon-o">/</span><span class="crayon-v">scripts</span><span class="crayon-o">/</span><span class="crayon-v">build_deb</span><span class="crayon-e">.sh</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb0917720986-4"><span class="crayon-r">chmod</span><span class="crayon-h"> </span><span class="crayon-o">+</span><span class="crayon-i">x</span><span class="crayon-h"> </span><span class="crayon-v">build_deb</span><span class="crayon-e">.sh</span></div><div class="crayon-line" id="crayon-5dd647bb8beb0917720986-5"><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">build_deb</span><span class="crayon-e">.sh</span><span class="crayon-h"> </span><span class="crayon-v">all</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+<strong>方法3. 手动编译安装（Ubuntu 16.04 / Debian 8及以上），在你需要从最新master源码编译时候可以使用这种方式。</strong></p>
+<p>先通过git下载源码：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb2157348846" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">git clone https://github.com/shadowsocks/shadowsocks-libev.git
+cd shadowsocks-libev
+git submodule update --init --recursive</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb2157348846-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb2157348846-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb2157348846-3">3</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb2157348846-1"><span class="crayon-e">git </span><span class="crayon-r">clone</span><span class="crayon-h"> </span><span class="crayon-v">https</span><span class="crayon-o">:</span><span class="crayon-c">//github.com/shadowsocks/shadowsocks-libev.git</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb2157348846-2"><span class="crayon-e">cd </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-e">libev</span></div><div class="crayon-line" id="crayon-5dd647bb8beb2157348846-3"><span class="crayon-e">git </span><span class="crayon-e">submodule </span><span class="crayon-v">update</span><span class="crayon-h"> </span><span class="crayon-o">--</span><span class="crayon-v">init</span><span class="crayon-h"> </span><span class="crayon-o">--</span><span class="crayon-v">recursive</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+安装必须的包：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb4078949528" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">sudo apt-get install --no-install-recommends autoconf automake \
+    debhelper pkg-config asciidoc xmlto libpcre3-dev apg pwgen rng-tools \
+    libev-dev libc-ares-dev dh-autoreconf libsodium-dev libmbedtls-dev</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb4078949528-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb4078949528-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb4078949528-3">3</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb4078949528-1"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-e">get </span><span class="crayon-v">install</span><span class="crayon-h"> </span><span class="crayon-o">--</span><span class="crayon-v">no</span><span class="crayon-o">-</span><span class="crayon-v">install</span><span class="crayon-o">-</span><span class="crayon-e">recommends </span><span class="crayon-e">autoconf </span><span class="crayon-i">automake</span><span class="crayon-h"> </span><span class="crayon-sy">\</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb4078949528-2"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">debhelper </span><span class="crayon-v">pkg</span><span class="crayon-o">-</span><span class="crayon-e">config </span><span class="crayon-e">asciidoc </span><span class="crayon-e">xmlto </span><span class="crayon-v">libpcre3</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-e">apg </span><span class="crayon-e">pwgen </span><span class="crayon-v">rng</span><span class="crayon-o">-</span><span class="crayon-i">tools</span><span class="crayon-h"> </span><span class="crayon-sy">\</span></div><div class="crayon-line" id="crayon-5dd647bb8beb4078949528-3"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">libev</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-v">libc</span><span class="crayon-o">-</span><span class="crayon-v">ares</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-v">dh</span><span class="crayon-o">-</span><span class="crayon-e">autoreconf </span><span class="crayon-v">libsodium</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-v">libmbedtls</span><span class="crayon-o">-</span><span class="crayon-v">dev</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+Debian 8的用户，注意需要从<a href="https://backports.debian.org/">Debian Backports</a>安装libsodium（最低版本v1.0.8）。</p>
+<p>注意：新版本需要debhelper版本大于等于10，不满足的请使用Backports安装新版debhelper：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb6545835536" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;"># 仅举例 Ubuntu 16.04 LTS
+# 先添加backports（添加过的跳过）
+echo 'deb http://archive.ubuntu.com/ubuntu xenial-backports main' &gt; /etc/apt/sources.list.d/xenial-backports.list
+# 安装
+sudo apt update
+sudo apt install debhelper/xenial-backports
+# backports中的软件较新，可以顺道更新一下
+sudo apt upgrade</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb6545835536-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb6545835536-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb6545835536-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb6545835536-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8beb6545835536-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb6545835536-6">6</div><div class="crayon-num" data-line="crayon-5dd647bb8beb6545835536-7">7</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb6545835536-8">8</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb6545835536-1"><span class="crayon-p"># 仅举例 Ubuntu 16.04 LTS</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb6545835536-2"><span class="crayon-p"># 先添加backports（添加过的跳过）</span></div><div class="crayon-line" id="crayon-5dd647bb8beb6545835536-3"><span class="crayon-i">echo</span><span class="crayon-h"> </span><span class="crayon-s">'deb http://archive.ubuntu.com/ubuntu xenial-backports main'</span><span class="crayon-h"> </span><span class="crayon-o">&gt;</span><span class="crayon-h"> </span><span class="crayon-o">/</span><span class="crayon-v">etc</span><span class="crayon-o">/</span><span class="crayon-v">apt</span><span class="crayon-o">/</span><span class="crayon-v">sources</span><span class="crayon-sy">.</span><span class="crayon-v">list</span><span class="crayon-sy">.</span><span class="crayon-v">d</span><span class="crayon-o">/</span><span class="crayon-v">xenial</span><span class="crayon-o">-</span><span class="crayon-v">backports</span><span class="crayon-sy">.</span><span class="crayon-v">list</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb6545835536-4"><span class="crayon-p"># 安装</span></div><div class="crayon-line" id="crayon-5dd647bb8beb6545835536-5"><span class="crayon-e">sudo </span><span class="crayon-e">apt </span><span class="crayon-e">update</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb6545835536-6"><span class="crayon-e">sudo </span><span class="crayon-e">apt </span><span class="crayon-e">install </span><span class="crayon-v">debhelper</span><span class="crayon-o">/</span><span class="crayon-v">xenial</span><span class="crayon-o">-</span><span class="crayon-v">backports</span></div><div class="crayon-line" id="crayon-5dd647bb8beb6545835536-7"><span class="crayon-p"># backports中的软件较新，可以顺道更新一下</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb6545835536-8"><span class="crayon-e">sudo </span><span class="crayon-e">apt </span><span class="crayon-v">upgrade</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+然后生成deb包并安装，一步步执行（留意是否出错 如果出错需要检查系统或者之前的步骤）：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb8351080654" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">./autogen.sh &amp;&amp; dpkg-buildpackage -b -us -uc
+cd ..
+sudo dpkg -i shadowsocks-libev*.deb</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb8351080654-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb8351080654-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb8351080654-3">3</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb8351080654-1"><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">autogen</span><span class="crayon-e">.sh</span><span class="crayon-h"> </span><span class="crayon-o">&amp;&amp;</span><span class="crayon-h"> </span><span class="crayon-v">dpkg</span><span class="crayon-o">-</span><span class="crayon-v">buildpackage</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">b</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">us</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-e">uc</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb8351080654-2"><span class="crayon-r">cd</span><span class="crayon-h"> </span><span class="crayon-sy">.</span><span class="crayon-sy">.</span></div><div class="crayon-line" id="crayon-5dd647bb8beb8351080654-3"><span class="crayon-e">sudo </span><span class="crayon-v">dpkg</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-i">i</span><span class="crayon-h"> </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span><span class="crayon-o">*</span><span class="crayon-e">.deb</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+</p><hr>
+<p>其他Unix-like的系统，特别是Debian-based的Linux发行版如： Ubuntu, Debian or Linux Mint</p>
+<p>先从最近的源码编译安装libmbedtls和libsodium</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beb9868969263" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">export LIBSODIUM_VER=1.0.11
+export MBEDTLS_VER=2.4.0
+wget https://download.libsodium.org/libsodium/releases/libsodium-$LIBSODIUM_VER.tar.gz
+tar xvf libsodium-$LIBSODIUM_VER.tar.gz
+pushd libsodium-$LIBSODIUM_VER
+./configure --prefix=/usr &amp;&amp; make
+sudo make install
+popd
+wget https://tls.mbed.org/download/mbedtls-$MBEDTLS_VER-gpl.tgz
+tar xvf mbedtls-$MBEDTLS_VER-gpl.tgz
+pushd mbedtls-$MBEDTLS_VER
+make SHARED=1 CFLAGS=-fPIC
+sudo make DESTDIR=/usr install
+popd</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-6">6</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-7">7</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-8">8</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-9">9</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-10">10</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-11">11</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-12">12</div><div class="crayon-num" data-line="crayon-5dd647bb8beb9868969263-13">13</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8beb9868969263-14">14</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-1"><span class="crayon-e">export </span><span class="crayon-v">LIBSODIUM_VER</span><span class="crayon-o">=</span><span class="crayon-cn">1.0.11</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-2"><span class="crayon-e">export </span><span class="crayon-v">MBEDTLS_VER</span><span class="crayon-o">=</span><span class="crayon-cn">2.4.0</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-3"><span class="crayon-e">wget </span><span class="crayon-v">https</span><span class="crayon-o">:</span><span class="crayon-o">/</span><span class="crayon-o">/</span><span class="crayon-v">download</span><span class="crayon-e">.libsodium</span><span class="crayon-e">.org</span><span class="crayon-o">/</span><span class="crayon-v">libsodium</span><span class="crayon-o">/</span><span class="crayon-v">releases</span><span class="crayon-o">/</span><span class="crayon-v">libsodium</span><span class="crayon-o">-</span><span class="crayon-v">$LIBSODIUM_VER</span><span class="crayon-e">.tar</span><span class="crayon-e">.gz</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-4"><span class="crayon-e">tar </span><span class="crayon-e">xvf </span><span class="crayon-v">libsodium</span><span class="crayon-o">-</span><span class="crayon-v">$LIBSODIUM_VER</span><span class="crayon-e">.tar</span><span class="crayon-e">.gz</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-5"><span class="crayon-e">pushd </span><span class="crayon-v">libsodium</span><span class="crayon-o">-</span><span class="crayon-v">$LIBSODIUM_VER</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-6"><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">configure</span><span class="crayon-h"> </span><span class="crayon-o">--</span><span class="crayon-v">prefix</span><span class="crayon-o">=</span><span class="crayon-o">/</span><span class="crayon-v">usr</span><span class="crayon-h"> </span><span class="crayon-o">&amp;&amp;</span><span class="crayon-h"> </span><span class="crayon-r">make</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-7"><span class="crayon-e">sudo </span><span class="crayon-r">make</span><span class="crayon-h"> </span><span class="crayon-e">install</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-8"><span class="crayon-e">popd</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-9"><span class="crayon-e">wget </span><span class="crayon-v">https</span><span class="crayon-o">:</span><span class="crayon-o">/</span><span class="crayon-o">/</span><span class="crayon-v">tls</span><span class="crayon-e">.mbed</span><span class="crayon-e">.org</span><span class="crayon-o">/</span><span class="crayon-v">download</span><span class="crayon-o">/</span><span class="crayon-v">mbedtls</span><span class="crayon-o">-</span><span class="crayon-v">$MBEDTLS_VER</span><span class="crayon-o">-</span><span class="crayon-v">gpl</span><span class="crayon-e">.tgz</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-10"><span class="crayon-e">tar </span><span class="crayon-e">xvf </span><span class="crayon-v">mbedtls</span><span class="crayon-o">-</span><span class="crayon-v">$MBEDTLS_VER</span><span class="crayon-o">-</span><span class="crayon-v">gpl</span><span class="crayon-e">.tgz</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-11"><span class="crayon-e">pushd </span><span class="crayon-v">mbedtls</span><span class="crayon-o">-</span><span class="crayon-v">$MBEDTLS_VER</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-12"><span class="crayon-r">make</span><span class="crayon-h"> </span><span class="crayon-v">SHARED</span><span class="crayon-o">=</span><span class="crayon-cn">1</span><span class="crayon-h"> </span><span class="crayon-v">CFLAGS</span><span class="crayon-o">=</span><span class="crayon-o">-</span><span class="crayon-e">fPIC</span></div><div class="crayon-line" id="crayon-5dd647bb8beb9868969263-13"><span class="crayon-e">sudo </span><span class="crayon-r">make</span><span class="crayon-h"> </span><span class="crayon-v">DESTDIR</span><span class="crayon-o">=</span><span class="crayon-o">/</span><span class="crayon-e">usr </span><span class="crayon-e">install</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8beb9868969263-14"><span class="crayon-v">popd</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+安装依赖包：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bebb600206127" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;"># Debian / Ubuntu
+sudo apt-get install --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
+# CentOS / Fedora / RHEL
+sudo yum install gettext gcc autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel
+# Arch
+sudo pacman -S gettext gcc autoconf libtool automake make asciidoc xmlto libev c-ares</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bebb600206127-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebb600206127-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8bebb600206127-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebb600206127-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8bebb600206127-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebb600206127-6">6</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bebb600206127-1"><span class="crayon-c"># Debian / Ubuntu</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebb600206127-2"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-o">-</span><span class="crayon-r">get</span><span class="crayon-h"> </span><span class="crayon-v">install</span><span class="crayon-h"> </span><span class="crayon-o">--</span><span class="crayon-v">no</span><span class="crayon-o">-</span><span class="crayon-v">install</span><span class="crayon-o">-</span><span class="crayon-e">recommends </span><span class="crayon-e">gettext </span><span class="crayon-v">build</span><span class="crayon-o">-</span><span class="crayon-e">essential </span><span class="crayon-e">autoconf </span><span class="crayon-e">libtool </span><span class="crayon-v">libpcre3</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-e">asciidoc </span><span class="crayon-e">xmlto </span><span class="crayon-v">libev</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-v">libc</span><span class="crayon-o">-</span><span class="crayon-v">ares</span><span class="crayon-o">-</span><span class="crayon-e">dev </span><span class="crayon-v">automake</span></div><div class="crayon-line" id="crayon-5dd647bb8bebb600206127-3"><span class="crayon-c"># CentOS / Fedora / RHEL</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebb600206127-4"><span class="crayon-e">sudo </span><span class="crayon-e">yum </span><span class="crayon-e">install </span><span class="crayon-e">gettext </span><span class="crayon-e">gcc </span><span class="crayon-e">autoconf </span><span class="crayon-e">libtool </span><span class="crayon-e">automake </span><span class="crayon-r">make</span><span class="crayon-h"> </span><span class="crayon-e">asciidoc </span><span class="crayon-i">xmlto</span><span class="crayon-h"> </span><span class="crayon-v">c</span><span class="crayon-o">-</span><span class="crayon-v">ares</span><span class="crayon-o">-</span><span class="crayon-e">devel </span><span class="crayon-v">libev</span><span class="crayon-o">-</span><span class="crayon-v">devel</span></div><div class="crayon-line" id="crayon-5dd647bb8bebb600206127-5"><span class="crayon-c"># Arch</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebb600206127-6"><span class="crayon-e">sudo </span><span class="crayon-v">pacman</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-i">S</span><span class="crayon-h"> </span><span class="crayon-e">gettext </span><span class="crayon-e">gcc </span><span class="crayon-e">autoconf </span><span class="crayon-e">libtool </span><span class="crayon-e">automake </span><span class="crayon-r">make</span><span class="crayon-h"> </span><span class="crayon-e">asciidoc </span><span class="crayon-e">xmlto </span><span class="crayon-i">libev</span><span class="crayon-h"> </span><span class="crayon-v">c</span><span class="crayon-o">-</span><span class="crayon-v">ares</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+编译：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bebc456554503" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">./autogen.sh &amp;&amp; ./configure &amp;&amp; make
+sudo make install</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bebc456554503-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebc456554503-2">2</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bebc456554503-1"><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">autogen</span><span class="crayon-sy">.</span><span class="crayon-v">sh</span><span class="crayon-h"> </span><span class="crayon-o">&amp;&amp;</span><span class="crayon-h"> </span><span class="crayon-sy">.</span><span class="crayon-o">/</span><span class="crayon-v">configure</span><span class="crayon-h"> </span><span class="crayon-o">&amp;&amp;</span><span class="crayon-h"> </span><span class="crayon-e">make</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebc456554503-2"><span class="crayon-e">sudo </span><span class="crayon-e">make </span><span class="crayon-v">install</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+二、配置与启动</p>
+<p>1、配置文件为：/etc/shadowsocks-libev/config.json，格式说明：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bebe520438434" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">{
+	"server":"example.com or X.X.X.X",
+	"mode":"tcp_and_udp",
+	"server_port":443,
+	"password":"password",
+	"method":"aes-128-gcm",
+	"fast_open":true,
+	"timeout":60
+}</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bebe520438434-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebe520438434-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8bebe520438434-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebe520438434-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8bebe520438434-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebe520438434-6">6</div><div class="crayon-num" data-line="crayon-5dd647bb8bebe520438434-7">7</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bebe520438434-8">8</div><div class="crayon-num" data-line="crayon-5dd647bb8bebe520438434-9">9</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bebe520438434-1">{</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebe520438434-2">	"server":"example.com or X.X.X.X",</div><div class="crayon-line" id="crayon-5dd647bb8bebe520438434-3">	"mode":"tcp_and_udp",</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebe520438434-4">	"server_port":443,</div><div class="crayon-line" id="crayon-5dd647bb8bebe520438434-5">	"password":"password",</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebe520438434-6">	"method":"aes-128-gcm",</div><div class="crayon-line" id="crayon-5dd647bb8bebe520438434-7">	"fast_open":true,</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bebe520438434-8">	"timeout":60</div><div class="crayon-line" id="crayon-5dd647bb8bebe520438434-9">}</div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+<span style="font-size: 14px;">其中：</span></p>
+<blockquote><p><em>server：主机域名或者IP地址，尽量填IP</em></p>
+<p><em>server_port：服务器监听端口</em></p>
+<p><em>password：密码</em></p>
+<p><em>method：加密方式 所有支持的加密方式请参照官方文档。这里本人推荐只使用支持AEAD的加密方式，包括以下五种： aes-128-gcm/aes-192-gcm/aes-256-gcm/chacha20-ietf-poly1305/xchacha20-ietf-poly1305</em></p></blockquote>
+<p>timeout：连接超时时间，单位秒。要适中。</p>
+<p>注意引号。</p>
+<p>2、控制启动、停止、重启：</p>
+<p>由于目前大部分新的linux发行版都已经支持systemd，因此，可以统一使用如下命令</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bec0789535666" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;"># Start
+sudo systemctl start shadowsocks-libev.service
+# Stop
+sudo systemctl stop shadowsocks-libev.service
+# Restart
+sudo systemctl restart shadowsocks-libev.service</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bec0789535666-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec0789535666-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8bec0789535666-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec0789535666-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8bec0789535666-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec0789535666-6">6</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bec0789535666-1"><span class="crayon-c"># Start</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec0789535666-2"><span class="crayon-e">sudo </span><span class="crayon-e">systemctl </span><span class="crayon-e">start </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span><span class="crayon-e">.service</span></div><div class="crayon-line" id="crayon-5dd647bb8bec0789535666-3"><span class="crayon-c"># Stop</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec0789535666-4"><span class="crayon-e">sudo </span><span class="crayon-e">systemctl </span><span class="crayon-e">stop </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span><span class="crayon-e">.service</span></div><div class="crayon-line" id="crayon-5dd647bb8bec0789535666-5"><span class="crayon-c"># Restart</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec0789535666-6"><span class="crayon-e">sudo </span><span class="crayon-e">systemctl </span><span class="crayon-e">restart </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span><span class="crayon-e">.service</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+&nbsp;</p>
+<p>需要前台运行时候，执行ss-server命令运行，具体用法如下：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bec1984556806" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">    ss-[local|redir|server|tunnel]
+
+       -s &lt;server_host&gt;           host name or ip address of your remote server
+
+       -p &lt;server_port&gt;           port number of your remote server
+
+       -l &lt;local_port&gt;            port number of your local server
+
+       -k &lt;password&gt;              password of your remote server
+
+       -m &lt;encrypt_method&gt;        Encrypt method: rc4-md5,
+                                  aes-128-gcm, aes-192-gcm, aes-256-gcm,
+                                  aes-128-cfb, aes-192-cfb, aes-256-cfb,
+                                  aes-128-ctr, aes-192-ctr, aes-256-ctr,
+                                  camellia-128-cfb, camellia-192-cfb,
+                                  camellia-256-cfb, bf-cfb,
+                                  chacha20-poly1305, chacha20-ietf-poly1305
+                                  salsa20, chacha20 and chacha20-ietf.
+
+       [-f &lt;pid_file&gt;]            the file path to store pid
+
+       [-t &lt;timeout&gt;]             socket timeout in seconds
+
+       [-c &lt;config_file&gt;]         the path to config file
+
+       [-i &lt;interface&gt;]           network interface to bind,
+                                  not available in redir mode
+
+       [-b &lt;local_address&gt;]       local address to bind,
+                                  not available in server mode
+
+       [-u]                       enable udprelay mode,
+                                  TPROXY is required in redir mode
+
+       [-U]                       enable UDP relay and disable TCP relay,
+                                  not available in local mode
+
+       [-L &lt;addr&gt;:&lt;port&gt;]         specify destination server address and port
+                                  for local port forwarding,
+                                  only available in tunnel mode
+
+       [-d &lt;addr&gt;]                setup name servers for internal DNS resolver,
+                                  only available in server mode
+
+       [--fast-open]              enable TCP fast open,
+                                  only available in local and server mode,
+                                  with Linux kernel &gt; 3.7.0
+
+       [--acl &lt;acl_file&gt;]         config file of ACL (Access Control List)
+                                  only available in local and server mode
+
+       [--manager-address &lt;addr&gt;] UNIX domain socket address
+                                  only available in server and manager mode
+
+       [--executable &lt;path&gt;]      path to the executable of ss-server
+                                  only available in manager mode
+
+       [--plugin &lt;name&gt;]          Enable SIP003 plugin. (Experimental)
+       [--plugin-opts &lt;options&gt;]  Set SIP003 plugin options. (Experimental)
+
+       [-v]                       verbose mode
+
+notes:
+
+    ss-redir provides a transparent proxy function and only works on the
+    Linux platform with iptables.</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-5">5</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-6">6</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-7">7</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-8">8</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-9">9</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-10">10</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-11">11</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-12">12</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-13">13</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-14">14</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-15">15</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-16">16</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-17">17</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-18">18</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-19">19</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-20">20</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-21">21</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-22">22</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-23">23</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-24">24</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-25">25</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-26">26</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-27">27</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-28">28</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-29">29</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-30">30</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-31">31</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-32">32</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-33">33</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-34">34</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-35">35</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-36">36</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-37">37</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-38">38</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-39">39</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-40">40</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-41">41</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-42">42</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-43">43</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-44">44</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-45">45</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-46">46</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-47">47</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-48">48</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-49">49</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-50">50</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-51">51</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-52">52</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-53">53</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-54">54</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-55">55</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-56">56</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-57">57</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-58">58</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-59">59</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-60">60</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-61">61</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-62">62</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-63">63</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-64">64</div><div class="crayon-num" data-line="crayon-5dd647bb8bec1984556806-65">65</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bec1984556806-66">66</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-1"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">ss</span><span class="crayon-o">-</span><span class="crayon-sy">[</span><span class="crayon-v">local</span><span class="crayon-o">|</span><span class="crayon-v">redir</span><span class="crayon-o">|</span><span class="crayon-v">server</span><span class="crayon-o">|</span><span class="crayon-v">tunnel</span><span class="crayon-sy">]</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-2">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-3"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-o">-</span><span class="crayon-v">s</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">server_host</span><span class="crayon-o">&gt;</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">host </span><span class="crayon-e">name </span><span class="crayon-st">or</span><span class="crayon-h"> </span><span class="crayon-e">ip </span><span class="crayon-e">address </span><span class="crayon-e">of </span><span class="crayon-e">your </span><span class="crayon-e">remote </span><span class="crayon-v">server</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-4">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-5"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-o">-</span><span class="crayon-v">p</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">server_port</span><span class="crayon-o">&gt;</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">port </span><span class="crayon-e">number </span><span class="crayon-e">of </span><span class="crayon-e">your </span><span class="crayon-e">remote </span><span class="crayon-v">server</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-6">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-7"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-o">-</span><span class="crayon-v">l</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">local_port</span><span class="crayon-o">&gt;</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">port </span><span class="crayon-e">number </span><span class="crayon-e">of </span><span class="crayon-e">your </span><span class="crayon-e">local </span><span class="crayon-v">server</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-8">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-9"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-o">-</span><span class="crayon-v">k</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">password</span><span class="crayon-o">&gt;</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">password </span><span class="crayon-e">of </span><span class="crayon-e">your </span><span class="crayon-e">remote </span><span class="crayon-v">server</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-10">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-11"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-o">-</span><span class="crayon-v">m</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">encrypt_method</span><span class="crayon-o">&gt;</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">Encrypt </span><span class="crayon-v">method</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-v">rc4</span><span class="crayon-o">-</span><span class="crayon-v">md5</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-12"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">128</span><span class="crayon-o">-</span><span class="crayon-v">gcm</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">192</span><span class="crayon-o">-</span><span class="crayon-v">gcm</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">256</span><span class="crayon-o">-</span><span class="crayon-v">gcm</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-13"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">128</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">192</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">256</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-14"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">128</span><span class="crayon-o">-</span><span class="crayon-v">ctr</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">192</span><span class="crayon-o">-</span><span class="crayon-v">ctr</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">aes</span><span class="crayon-o">-</span><span class="crayon-cn">256</span><span class="crayon-o">-</span><span class="crayon-v">ctr</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-15"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">camellia</span><span class="crayon-o">-</span><span class="crayon-cn">128</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">camellia</span><span class="crayon-o">-</span><span class="crayon-cn">192</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-16"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">camellia</span><span class="crayon-o">-</span><span class="crayon-cn">256</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">bf</span><span class="crayon-o">-</span><span class="crayon-v">cfb</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-17"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">chacha20</span><span class="crayon-o">-</span><span class="crayon-v">poly1305</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-v">chacha20</span><span class="crayon-o">-</span><span class="crayon-v">ietf</span><span class="crayon-o">-</span><span class="crayon-e">poly1305</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-18"><span class="crayon-e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">salsa20</span><span class="crayon-sy">,</span><span class="crayon-h"> </span><span class="crayon-e">chacha20 </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-v">chacha20</span><span class="crayon-o">-</span><span class="crayon-v">ietf</span><span class="crayon-sy">.</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-19">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-20"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">f</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">pid_file</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">the </span><span class="crayon-e">file </span><span class="crayon-e">path </span><span class="crayon-st">to</span><span class="crayon-h"> </span><span class="crayon-e">store </span><span class="crayon-i">pid</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-21">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-22"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">t</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">timeout</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">socket </span><span class="crayon-e">timeout </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-i">seconds</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-23">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-24"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">c</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">config_file</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">the </span><span class="crayon-e">path </span><span class="crayon-st">to</span><span class="crayon-h"> </span><span class="crayon-e">config </span><span class="crayon-i">file</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-25">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-26"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">i</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-t">interface</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">network </span><span class="crayon-t">interface</span><span class="crayon-h"> </span><span class="crayon-st">to</span><span class="crayon-h"> </span><span class="crayon-v">bind</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-27"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-st">not</span><span class="crayon-h"> </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">redir </span><span class="crayon-i">mode</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-28">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-29"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">b</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">local_address</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">local </span><span class="crayon-e">address </span><span class="crayon-st">to</span><span class="crayon-h"> </span><span class="crayon-v">bind</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-30"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-st">not</span><span class="crayon-h"> </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">server </span><span class="crayon-i">mode</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-31">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-32"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">u</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">enable </span><span class="crayon-e">udprelay </span><span class="crayon-v">mode</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-33"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">TPROXY </span><span class="crayon-st">is</span><span class="crayon-h"> </span><span class="crayon-e">required </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">redir </span><span class="crayon-i">mode</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-34">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-35"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">U</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">enable </span><span class="crayon-e">UDP </span><span class="crayon-e">relay </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">disable </span><span class="crayon-e">TCP </span><span class="crayon-v">relay</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-36"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-st">not</span><span class="crayon-h"> </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">local </span><span class="crayon-i">mode</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-37">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-38"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">L</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">addr</span><span class="crayon-o">&gt;</span><span class="crayon-o">:</span><span class="crayon-o">&lt;</span><span class="crayon-v">port</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">specify </span><span class="crayon-e">destination </span><span class="crayon-e">server </span><span class="crayon-e">address </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">port</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-39"><span class="crayon-e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-st">for</span><span class="crayon-h"> </span><span class="crayon-e">local </span><span class="crayon-e">port </span><span class="crayon-v">forwarding</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-40"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">tunnel </span><span class="crayon-i">mode</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-41">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-42"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">d</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">addr</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">setup </span><span class="crayon-e">name </span><span class="crayon-e">servers </span><span class="crayon-st">for</span><span class="crayon-h"> </span><span class="crayon-e">internal </span><span class="crayon-e">DNS </span><span class="crayon-v">resolver</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-43"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">server </span><span class="crayon-i">mode</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-44">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-45"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">fast</span><span class="crayon-o">-</span><span class="crayon-v">open</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">enable </span><span class="crayon-e">TCP </span><span class="crayon-e">fast </span><span class="crayon-v">open</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-46"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">local </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">server </span><span class="crayon-v">mode</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-47"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">with </span><span class="crayon-e">Linux </span><span class="crayon-v">kernel</span><span class="crayon-h"> </span><span class="crayon-o">&gt;</span><span class="crayon-h"> </span><span class="crayon-cn">3.7.0</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-48">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-49"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">acl</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">acl_file</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">config </span><span class="crayon-e">file </span><span class="crayon-e">of </span><span class="crayon-e">ACL</span><span class="crayon-h"> </span><span class="crayon-sy">(</span><span class="crayon-e">Access </span><span class="crayon-e">Control </span><span class="crayon-v">List</span><span class="crayon-sy">)</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-50"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">local </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">server </span><span class="crayon-i">mode</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-51">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-52"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">manager</span><span class="crayon-o">-</span><span class="crayon-v">address</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">addr</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h"> </span><span class="crayon-e">UNIX </span><span class="crayon-e">domain </span><span class="crayon-e">socket </span><span class="crayon-e">address</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-53"><span class="crayon-e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">server </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">manager </span><span class="crayon-i">mode</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-54">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-55"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">executable</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">path</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">path </span><span class="crayon-st">to</span><span class="crayon-h"> </span><span class="crayon-e">the </span><span class="crayon-e">executable </span><span class="crayon-e">of </span><span class="crayon-v">ss</span><span class="crayon-o">-</span><span class="crayon-e">server</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-56"><span class="crayon-e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">only </span><span class="crayon-e">available </span><span class="crayon-st">in</span><span class="crayon-h"> </span><span class="crayon-e">manager </span><span class="crayon-i">mode</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-57">&nbsp;</div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-58"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">plugin</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">name</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">Enable </span><span class="crayon-e">SIP003 </span><span class="crayon-v">plugin</span><span class="crayon-sy">.</span><span class="crayon-h"> </span><span class="crayon-sy">(</span><span class="crayon-v">Experimental</span><span class="crayon-sy">)</span></div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-59"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">--</span><span class="crayon-v">plugin</span><span class="crayon-o">-</span><span class="crayon-v">opts</span><span class="crayon-h"> </span><span class="crayon-o">&lt;</span><span class="crayon-v">options</span><span class="crayon-o">&gt;</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;</span><span class="crayon-e">Set </span><span class="crayon-e">SIP003 </span><span class="crayon-e">plugin </span><span class="crayon-v">options</span><span class="crayon-sy">.</span><span class="crayon-h"> </span><span class="crayon-sy">(</span><span class="crayon-v">Experimental</span><span class="crayon-sy">)</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-60">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-61"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-sy">[</span><span class="crayon-o">-</span><span class="crayon-v">v</span><span class="crayon-sy">]</span><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="crayon-e">verbose </span><span class="crayon-e">mode</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-62">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-63"><span class="crayon-v">notes</span><span class="crayon-o">:</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-64">&nbsp;</div><div class="crayon-line" id="crayon-5dd647bb8bec1984556806-65"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-v">ss</span><span class="crayon-o">-</span><span class="crayon-e">redir </span><span class="crayon-i">provides</span><span class="crayon-h"> </span><span class="crayon-i">a</span><span class="crayon-h"> </span><span class="crayon-e">transparent </span><span class="crayon-e">proxy </span><span class="crayon-t">function</span><span class="crayon-h"> </span><span class="crayon-st">and</span><span class="crayon-h"> </span><span class="crayon-e">only </span><span class="crayon-e">works </span><span class="crayon-e">on </span><span class="crayon-e">the</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bec1984556806-66"><span class="crayon-e">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-e">Linux </span><span class="crayon-e">platform </span><span class="crayon-e">with </span><span class="crayon-v">iptables</span><span class="crayon-sy">.</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+一个例子如：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bec4965815521" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">ss-server -c /etc/shadowsocks/config.json -u</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bec4965815521-1">1</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bec4965815521-1"><span class="crayon-v">ss</span><span class="crayon-o">-</span><span class="crayon-v">server</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">c</span><span class="crayon-h"> </span><span class="crayon-o">/</span><span class="crayon-v">etc</span><span class="crayon-o">/</span><span class="crayon-v">shadowsocks</span><span class="crayon-o">/</span><span class="crayon-v">config</span><span class="crayon-e">.json</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">u</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+查看shadowsocks是否正确启动并监听相应端口，看到有ss-server进程LISTEN正确的端口就表示成功：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bec6259866182" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">netstat -lnp | grep ss-server</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bec6259866182-1">1</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bec6259866182-1"><span class="crayon-v">netstat</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">lnp</span><span class="crayon-h"> </span><span class="crayon-o">|</span><span class="crayon-h"> </span><span class="crayon-r">grep</span><span class="crayon-h"> </span><span class="crayon-v">ss</span><span class="crayon-o">-</span><span class="crayon-v">server</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+<strong>服务器优化</strong></p>
+<p>1.&nbsp; 开启TCP Fast Open：</p>
+<p><span style="text-decoration: underline;">需求： 系统内核版本≥3.7，shadowsocks-libev≥3.0.4。</span></p>
+<p>修改<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+			<span id="crayon-5dd647bb8bec7270367764" class="crayon-syntax crayon-syntax-inline  crayon-theme-github crayon-theme-github-inline crayon-font-consolas" style="font-size: 14px !important; line-height: 16px !important;font-size: 14px !important;"><span class="crayon-pre crayon-code" style="font-size: 14px !important; line-height: 16px !important;font-size: 14px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><span class="crayon-o">/</span><span class="crayon-v">etc</span><span class="crayon-o">/</span><span class="crayon-v">sysctl</span><span class="crayon-sy">.</span><span class="crayon-v">conf</span></span></span>&nbsp;，加入如下一行：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bec9000659858" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">net.ipv4.tcp_fastopen = 3</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bec9000659858-1">1</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bec9000659858-1"><span class="crayon-v">net</span><span class="crayon-sy">.</span><span class="crayon-v">ipv4</span><span class="crayon-sy">.</span><span class="crayon-v">tcp_fastopen</span><span class="crayon-h"> </span><span class="crayon-o">=</span><span class="crayon-h"> </span><span class="crayon-cn">3</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+执行如下命令使之生效：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8beca313984386" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div><span class="crayon-language">Shell</span></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">sysctl -p</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8beca313984386-1">1</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8beca313984386-1"><span class="crayon-v">sysctl</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-v">p</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+配置文件<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+			<span id="crayon-5dd647bb8becc462288022" class="crayon-syntax crayon-syntax-inline  crayon-theme-github crayon-theme-github-inline crayon-font-consolas" style="font-size: 14px !important; line-height: 16px !important;font-size: 14px !important;"><span class="crayon-pre crayon-code" style="font-size: 14px !important; line-height: 16px !important;font-size: 14px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><span class="crayon-o">/</span><span class="crayon-v">etc</span><span class="crayon-o">/</span><span class="crayon-v">shadowsocks</span><span class="crayon-sy">.</span><span class="crayon-v">json</span></span></span>&nbsp;增加一行：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8bece052122949" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">{
+      "server": "X.X.X.X",
+      "server_port": "443",
+      "password": "password",
+      "method": "aes-128-gcm",
+      "fast_open": true
+}</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8bece052122949-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bece052122949-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8bece052122949-3">3</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8bece052122949-4">4</div><div class="crayon-num" data-line="crayon-5dd647bb8bece052122949-5">5</div><div class="crayon-num crayon-marked-num crayon-top crayon-bottom crayon-striped-num" data-line="crayon-5dd647bb8bece052122949-6">6</div><div class="crayon-num" data-line="crayon-5dd647bb8bece052122949-7">7</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8bece052122949-1"><span class="crayon-sy">{</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bece052122949-2"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-s">"server"</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-s">"X.X.X.X"</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bece052122949-3"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-s">"server_port"</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-s">"443"</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8bece052122949-4"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-s">"password"</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-s">"password"</span><span class="crayon-sy">,</span></div><div class="crayon-line" id="crayon-5dd647bb8bece052122949-5"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-s">"method"</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-s">"aes-128-gcm"</span><span class="crayon-sy">,</span></div><div class="crayon-line crayon-marked-line crayon-top crayon-bottom crayon-striped-line" id="crayon-5dd647bb8bece052122949-6"><span class="crayon-h">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="crayon-s">"fast_open"</span><span class="crayon-o">:</span><span class="crayon-h"> </span><span class="crayon-t">true</span></div><div class="crayon-line" id="crayon-5dd647bb8bece052122949-7"><span class="crayon-sy">}</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+2. 其他优化以及配置单边/双边加速</p>
+<p>参照官方说明: <a href="http://shadowsocks.org/en/config/advanced.html" target="_blank" rel="noopener noreferrer">http://shadowsocks.org/en/config/advanced.html</a></p>
+<p>不过官方说明里面的TCP流控使用了hybla：</p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8becf210708202" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code" style="display: none;"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">net.ipv4.tcp_congestion_control = hybla</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8becf210708202-1">1</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8becf210708202-1"><span class="crayon-v">net</span><span class="crayon-sy">.</span><span class="crayon-v">ipv4</span><span class="crayon-sy">.</span><span class="crayon-v">tcp_congestion_control</span><span class="crayon-h"> </span><span class="crayon-o">=</span><span class="crayon-h"> </span><span class="crayon-v">hybla</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p>
+这里推荐使用bbr而不是hybla。bbr需要内核版本不小于4.9，如果内核版本不够，需要更换内核。注意换内核操作不当可能导致vps无法开机，如果发生问题，有救援模式的可能还能救一下，否则只能找客服处理；KVM的通常更换内核没有问题，OpenVZ是不支持更换内核的。具体的更换内核和开启bbr的步骤参考这里：</p>
+<p><a href="https://github.com/iMeiji/shadowsocks_install/wiki/%E5%BC%80%E5%90%AFTCP-BBR%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95" target="_blank" rel="noopener noreferrer">开启TCP BBR拥塞控制算法</a></p>
+<p>再推荐一个一键脚本：</p>
+<p><a href="https://moeclub.org/2017/06/06/249/" target="_blank" rel="noopener noreferrer">Debian/Ubuntu 开启 TCP BBR 拥塞算法</a></p>
+<p>然后换完内核开启BBR之后，可以再换一个魔改版的BBR，优化了参数：</p>
+<p><a href="https://moeclub.org/2017/06/24/278/" target="_blank" rel="noopener noreferrer">Debian/Ubuntu TCP BBR 改进版/增强版</a></p>
+<p>注意，OpenVZ的VPS可能无法修改大部分的属性，因此如果想要优化网速需要考虑：</p>
+<p>1. 使用kcptun双边加速；</p>
+<p>2. 通过linux kernel library来实现，同样是一键脚本：</p>
+<p><a href="https://blog.kuoruan.com/116.html" target="_blank" rel="noopener noreferrer">OpenVZ 平台 Google BBR 一键安装脚本</a>。</p>
+<p><strong><span style="color: #ff0000;">如果您还未购买将要购买国外VPS搭建shadowsocks，这里为您推荐几家VPS提供商，详情见</span><a href="https://cokebar.info/about/" target="_blank" rel="noopener noreferrer">《关于本站》</a><span style="color: #ff0000;">页面。</span></strong></p>
+<div class="crp_related "><hr><h3 class="widget-title"><strong>相关文章：</strong></h3><ul><blockquote><li style="margin-bottom: 15px"><em><a href="https://cokebar.info/archives/2151" target="_blank"><span class="crp_title">NextCloud + Aria2 + Transmission 搭建私有云盘 +下载服务器</span></a></em></li><li style="margin-bottom: 15px"><em><a href="https://cokebar.info/archives/2140" target="_blank"><span class="crp_title">VPS上新建用户 禁用root登录SSH WinSCP提权登录</span></a></em></li><li style="margin-bottom: 15px"><em><a href="https://cokebar.info/archives/2444" target="_blank"><span class="crp_title">虚拟机运行 OpenWrt 的方法 (VMware Workstation)</span></a></em></li><li style="margin-bottom: 15px"><em><a href="https://cokebar.info/archives/1890" target="_blank"><span class="crp_title">KMS 自动激活利器 – vlmcsd for OpenWrt / LEDE</span></a></em></li></blockquote></ul><div class="crp_clear"></div></div>							<div class="tags">
+								<a href="https://cokebar.info/tags/shadowsocks-libev" rel="tag">shadowsocks-libev</a>，<a href="https://cokebar.info/tags/ss-server" rel="tag">ss-server</a>							</div>
+							  			</div>
+
+  						<ul class="default-wp-page clearfix">
+				<li class="previous"><a href="https://cokebar.info/archives/734" rel="prev"><span class="meta-nav">←</span> 加速OpenWRT路由器的DNS解析 – pdnsd代替dnsmasq</a></li>
+				<li class="next"><a href="https://cokebar.info/archives/783" rel="next">apache2 反向代理 Google Web Fonts &amp; Gravatar <span class="meta-nav">→</span></a></li>
+			</ul>
+		
+<div id="comments" class="comments-area">
+
+	
+			<h2 class="comments-title">
+			67 条评论		</h2>
+
+		<ol class="commentlist">
+				<li class="comment even thread-even depth-1" id="li-comment-2927">
+		<article id="comment-2927" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/7983d3f4a6f057be951cc0a8b4f1aea3.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">allan </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-2927"><time pubdate="" datetime="2017-01-04T17:14:57+08:00">2017-01-04 于 17:14</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-2927" data-commentid="2927" data-postid="767" data-belowelement="comment-2927" data-respondelement="respond" aria-label="回复给allan">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>编译deb安装包应该为<br>
+ dpkg-buildpackage -us -uc -b -i<br>
+ 请楼主更新命令</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment odd alt depth-2" id="li-comment-3401">
+		<article id="comment-3401" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/ca7dc0e49215a7e0f6f339818655afb8.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">ken </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3401"><time pubdate="" datetime="2017-06-22T22:25:02+08:00">2017-06-22 于 22:25</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3401" data-commentid="3401" data-postid="767" data-belowelement="comment-3401" data-respondelement="respond" aria-label="回复给ken">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>编译deb安装包应该为<br>
+dpkg-buildpackage -b -us -uc -d</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1" id="li-comment-2980">
+		<article id="comment-2980" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/a794d4145d3c5a8714cd4967321c8e1e.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">dover </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-2980"><time pubdate="" datetime="2017-02-02T15:22:49+08:00">2017-02-02 于 15:22</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-2980" data-commentid="2980" data-postid="767" data-belowelement="comment-2980" data-respondelement="respond" aria-label="回复给dover">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>Debian 8 x64 (jessie) 内核4.9.7-040907-generic<br>
+按照上面的流程，一步一步操作的<br>
+报这个错，请问是什么情况呢？<br>
+./autogen.sh: 3: ./autogen.sh: autoreconf: not found</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment odd alt depth-2" id="li-comment-2981">
+		<article id="comment-2981" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/a794d4145d3c5a8714cd4967321c8e1e.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">dover </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-2981"><time pubdate="" datetime="2017-02-02T15:53:58+08:00">2017-02-02 于 15:53</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-2981" data-commentid="2981" data-postid="767" data-belowelement="comment-2981" data-respondelement="respond" aria-label="回复给dover">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>现在报这个错了。。。。晕，请问是哪儿没对呀</p>
+<p>configure: exit 1<br>
+dh_auto_configure: ./configure –build=x86_64-linux-gnu –prefix=/usr –includedir=${prefix}/include –mandir=${prefix}/share/man –infodir=${prefix}/share/info –sysconfdir=/etc –localstatedir=/var –disable-silent-rules –libdir=${prefix}/lib/x86_64-linux-gnu –libexecdir=${prefix}/lib/x86_64-linux-gnu –disable-maintainer-mode –disable-dependency-tracking –enable-shared –disable-ssp returned exit code 1<br>
+debian/rules:17: recipe for target ‘override_dh_auto_configure’ failed<br>
+make[1]: *** [override_dh_auto_configure] Error 2<br>
+make[1]: Leaving directory ‘/root/shadowsocks-libev’<br>
+debian/rules:28: recipe for target ‘build’ failed<br>
+make: *** [build] Error 2<br>
+dpkg-buildpackage: error: debian/rules build gave error exit status 2</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	</li><!-- #comment-## -->
+	<li class="comment byuser comment-author-cokebar bypostauthor even depth-2" id="li-comment-2983">
+		<article id="comment-2983" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/gokou-ruri-e1418037598195.jpg" width="44" height="44" alt="cokebar" class="avatar avatar-44 wp-user-avatar wp-user-avatar-44 alignnone photo"><cite class="fn"><a href="https://cokebar.info/" rel="external nofollow" class="url">cokebar</a> <span> 文章作者</span></cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-2983"><time pubdate="" datetime="2017-02-02T15:56:37+08:00">2017-02-02 于 15:56</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-2983" data-commentid="2983" data-postid="767" data-belowelement="comment-2983" data-respondelement="respond" aria-label="回复给cokebar">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>由于shadowsocks-libev变动频繁，请以shadowsocks-libev的Github页面的readme为准：</p>
+<p><a href="https://github.com/shadowsocks/shadowsocks-libev" rel="nofollow">https://github.com/shadowsocks/shadowsocks-libev</a></p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment odd alt depth-3" id="li-comment-2987">
+		<article id="comment-2987" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/a794d4145d3c5a8714cd4967321c8e1e.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">dover </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-2987"><time pubdate="" datetime="2017-02-02T21:05:48+08:00">2017-02-02 于 21:05</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-2987" data-commentid="2987" data-postid="767" data-belowelement="comment-2987" data-respondelement="respond" aria-label="回复给dover">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>好的，谢谢。</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-even depth-1" id="li-comment-3153">
+		<article id="comment-3153" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/a794d4145d3c5a8714cd4967321c8e1e.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">dover </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3153"><time pubdate="" datetime="2017-03-04T16:30:32+08:00">2017-03-04 于 16:30</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3153" data-commentid="3153" data-postid="767" data-belowelement="comment-3153" data-respondelement="respond" aria-label="回复给dover">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>./build_deb.sh</p>
+<p>貌似需要赋执行权限</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment byuser comment-author-cokebar bypostauthor odd alt depth-2" id="li-comment-3339">
+		<article id="comment-3339" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/gokou-ruri-e1418037598195.jpg" width="44" height="44" alt="cokebar" class="avatar avatar-44 wp-user-avatar wp-user-avatar-44 alignnone photo"><cite class="fn"><a href="https://cokebar.info/" rel="external nofollow" class="url">cokebar</a> <span> 文章作者</span></cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3339"><time pubdate="" datetime="2017-05-19T22:55:49+08:00">2017-05-19 于 22:55</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3339" data-commentid="3339" data-postid="767" data-belowelement="comment-3339" data-respondelement="respond" aria-label="回复给cokebar">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>sh脚本当然需要，这个我就不额外提了</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1" id="li-comment-3605">
+		<article id="comment-3605" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/88f7e4235883511ded2b4cf71369f519.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">Passenger </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3605"><time pubdate="" datetime="2017-10-11T10:52:48+08:00">2017-10-11 于 10:52</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3605" data-commentid="3605" data-postid="767" data-belowelement="comment-3605" data-respondelement="respond" aria-label="回复给Passenger">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>飞羽老师，关于服务端部署方面我再来请教几个问题。<br>
+我部署的系统为Debian 9 x64，bbr已手动开启。<br>
+部署SS过程如下：<br>
+根据github主页的说明，用apt update和install两句命令成功安装。<br>
+然后按照本文的说明配置了/etc/shadowsocks-libev/config.json文件。<br>
+最后用/etc/init.d/shadowsocks-libev start命令成功启动SS服务。<br>
+启动后，经过命令netstat -lnp | grep ss-server检验结果正常。<br>
+然后我用手机客户端连接测试，发现连接失败。<br>
+之后受命令帮助的提示，发现默认帮助里面的加密方式并没有之前设置的“chacha20-ietf-poly1305”这种。因此我将服务端和客户端的加密方式都改为“chacha20”之后连接成功。<br>
+但根据本文所述，chacha20为不推荐的算法，所以我还是想改为之前的“chacha20-ietf-poly1305”。<br>
+因此想请教一下，出现我这种情况的原因大概是什么呢。我应该怎样设置才能使用“chacha20-ietf-poly1305”等推荐的加密方法来传输，谢谢！<br>
+另外，本博客另外一篇LEDE上部署客户端后面有一个tcp fast open优化，是在配置文件中加了一行”fast_open”: true。然后文章提示需要服务端同样开启tcp fast open，但是并没有提如何开启。所以请问，服务端是不是也应该在配置文件添加”fast_open”: true，谢谢！<br>
+最后再问一个问题，tcp bbr和tcp fast open两者并不冲突吧。我看本篇文章只提了bbr优化，没有说fast open，所以想是不是bbr开启之后fast open就没有必要了，谢谢！</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment byuser comment-author-cokebar bypostauthor odd alt depth-2" id="li-comment-3668">
+		<article id="comment-3668" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/gokou-ruri-e1418037598195.jpg" width="44" height="44" alt="cokebar" class="avatar avatar-44 wp-user-avatar wp-user-avatar-44 alignnone photo"><cite class="fn"><a href="https://cokebar.info/" rel="external nofollow" class="url">cokebar</a> <span> 文章作者</span></cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3668"><time pubdate="" datetime="2017-12-26T16:26:28+08:00">2017-12-26 于 16:26</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3668" data-commentid="3668" data-postid="767" data-belowelement="comment-3668" data-respondelement="respond" aria-label="回复给cokebar">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>shadowsocks-libev从3.0.0版本开始支持AEAD的加密算法。请检查你安装的ss版本。Debian我没用过，根据官方repo的readme说明，你可能需要从debian backports安装：</p>
+<p>For Debian 9 (Stretch) users, please install it from stretch-backports: We strongly encourage you to install shadowsocks-libev from stretch-backports. For more info about backports, you can refer Debian Backports.</p>
+<p></p><link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/github.css">
+<link rel="stylesheet" type="text/css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/consolas.css">
+
+		<div id="crayon-5dd647bb8d268073771134" class="crayon-syntax crayon-theme-github crayon-font-consolas crayon-os-pc print-yes notranslate" data-settings=" minimize scroll-mouseover" style="margin-top: 12px; margin-bottom: 12px; font-size: 14px !important; line-height: 16px !important; height: auto;">
+		
+			<div class="crayon-toolbar" data-settings=" show" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><span class="crayon-title"></span>
+			<div class="crayon-tools" style="font-size: 14px !important;height: 21px !important; line-height: 21px !important;"><div class="crayon-button crayon-nums-button crayon-pressed" title="Toggle Line Numbers"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-wrap-button" title="Toggle Line Wrap"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-expand-button" title="Expand Code"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-copy-button" title="Copy"><div class="crayon-button-icon"></div></div><div class="crayon-button crayon-popup-button" title="Open Code In New Window"><div class="crayon-button-icon"></div></div></div></div>
+			<div class="crayon-info" style="min-height: 19.6px !important; line-height: 19.6px !important;"></div>
+			<div class="crayon-plain-wrap"><textarea wrap="soft" class="crayon-plain print-no" data-settings="dblclick" readonly="" style="tab-size: 4; font-size: 14px !important; line-height: 16px !important; z-index: 0; opacity: 0; overflow: hidden;">sudo sh -c 'printf "deb http://deb.debian.org/debian stretch-backports main" &gt; /etc/apt/sources.list.d/stretch-backports.list'
+sudo apt update
+sudo apt -t stretch-backports install shadowsocks-libev</textarea></div>
+			<div class="crayon-main" style="position: relative; z-index: 1; overflow: hidden;">
+				<table class="crayon-table" style="">
+					<tbody><tr class="crayon-row">
+				<td class="crayon-nums " data-settings="show">
+					<div class="crayon-nums-content" style="font-size: 14px !important; line-height: 16px !important;"><div class="crayon-num" data-line="crayon-5dd647bb8d268073771134-1">1</div><div class="crayon-num crayon-striped-num" data-line="crayon-5dd647bb8d268073771134-2">2</div><div class="crayon-num" data-line="crayon-5dd647bb8d268073771134-3">3</div></div>
+				</td>
+						<td class="crayon-code"><div class="crayon-pre" style="font-size: 14px !important; line-height: 16px !important; -moz-tab-size:4; -o-tab-size:4; -webkit-tab-size:4; tab-size:4;"><div class="crayon-line" id="crayon-5dd647bb8d268073771134-1"><span class="crayon-e">sudo </span><span class="crayon-v">sh</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-i">c</span><span class="crayon-h"> </span><span class="crayon-s">'printf "deb http://deb.debian.org/debian stretch-backports main" &gt; /etc/apt/sources.list.d/stretch-backports.list'</span></div><div class="crayon-line crayon-striped-line" id="crayon-5dd647bb8d268073771134-2"><span class="crayon-e">sudo </span><span class="crayon-e">apt </span><span class="crayon-e">update</span></div><div class="crayon-line" id="crayon-5dd647bb8d268073771134-3"><span class="crayon-e">sudo </span><span class="crayon-v">apt</span><span class="crayon-h"> </span><span class="crayon-o">-</span><span class="crayon-i">t</span><span class="crayon-h"> </span><span class="crayon-v">stretch</span><span class="crayon-o">-</span><span class="crayon-e">backports </span><span class="crayon-e">install </span><span class="crayon-v">shadowsocks</span><span class="crayon-o">-</span><span class="crayon-v">libev</span></div></div></td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div><p></p>
+<p>至于tcp fast open的开启，和LEDE里是一样的，两步：<br>
+1. 内核开启TFO： 修改 /etc/sysctl.conf，写入：net.ipv4.tcp_fastopen = 3，运行 sudo sysctl -p 使之生效<br>
+2. shadowsocks配置文件里加上那一行 ”fast_open”: true</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	<ol class="children">
+	<li class="comment even depth-3" id="li-comment-3669">
+		<article id="comment-3669" class="comment">
+			<footer class="comment-meta comment-author vcard"><div>
+				<img src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/88f7e4235883511ded2b4cf71369f519.jpg" width="44" height="44" alt="头像" class="avatar avatar-44wp-user-avatar wp-user-avatar-44 alignnone photo avatar-default"><cite class="fn">Passenger </cite>				<span class="comment-meta" <a="" href="https://cokebar.info/archives/767/comment-page-4#comment-3669"><time pubdate="" datetime="2017-12-27T09:02:42+08:00">2017-12-27 于 09:02</time>				<a rel="nofollow" class="comment-reply-link" href="https://cokebar.info/archives/767#comment-3669" data-commentid="3669" data-postid="767" data-belowelement="comment-3669" data-respondelement="respond" aria-label="回复给Passenger">回复</a>				</span>
+			</div>
+
+
+			<!-- .comment-meta -->
+
+			
+			<section class="comment-content comment">
+				<p>非常感谢！确实应该是版本的问题。我之前没有使用backports，是直接apt install的，估计给装的是旧版本。按照backports方式已经没有问题了，一切正常。<br>
+fast open我抽空再设置一下试试，非常感谢！</p>
+							</section><!-- .comment-content -->
+
+		</footer></article><!-- #comment-## -->
+	</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="pingback odd alt thread-even depth-1" id="comment-4535">
+		<p>引用: <a href="https://www.dazhuanlan.com/2019/10/05/5d9841975d0f3/" rel="external nofollow" class="url">Ubuntu shadowsocks–libev服务端的部署 | 大专栏</a> </p>
+	</li><!-- #comment-## -->
+		</ol><!-- .commentlist -->
+
+		<div class="wp-pagenavi"><a class="prev page-numbers" href="https://cokebar.info/archives/767/comment-page-3#comments">上一页</a>
+<a class="page-numbers" href="https://cokebar.info/archives/767/comment-page-1#comments">1</a>
+<a class="page-numbers" href="https://cokebar.info/archives/767/comment-page-2#comments">2</a>
+<a class="page-numbers" href="https://cokebar.info/archives/767/comment-page-3#comments">3</a>
+<span aria-current="page" class="page-numbers current">4</span></div>
+	
+		<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">发表评论 <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://cokebar.info/archives/767#respond" style="display:none;">取消回复</a></small></h3>			<form action="https://cokebar.info/wp-comments-post.php" method="post" id="commentform" class="comment-form">
+				<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" required="required"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input id="author" name="author" type="text" value="" size="30" maxlength="245" required="required"></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input id="email" name="email" type="text" value="" size="30" maxlength="100" aria-describedby="email-notes" required="required"></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" name="url" type="text" value="" size="30" maxlength="200"></p>
+<p class="cptch_block"><span class="cptch_title">请输入验证码<span class="required"> *</span></span><script class="cptch_to_remove">
+				(function( timeout ) {
+					setTimeout(
+						function() {
+							var notice = document.getElementById("cptch_time_limit_notice_27");
+							if ( notice )
+								notice.style.display = "block";
+						},
+						timeout
+					);
+				})(120000);
+			</script>
+			<span id="cptch_time_limit_notice_27" class="cptch_time_limit_notice cptch_to_remove">请输入正确的验证码</span><span class="cptch_wrap cptch_math_actions">
+				<label class="cptch_label" for="cptch_input_27"><span class="cptch_span"><img class="cptch_img " src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIABAMAAAAGVsnJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABhQTFRFk5OT////YmJiubm5AAAA2dnZLi4u8fHx9hEeHgAACIFJREFUeNrt3U1f2zgQwOEEQrlGpMFX0k3DlUDas2uLcCUFyrWh2XBtCl2+/h72113K2onloLFe/jq3Bz/IMyNFGrd05KMFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8QDctc5unlZKJU83Z61RbADZ7q1aqWejfzKKCODugyoYV6NIAKZ7K1U8LhcxAHydqdLRfxM+wHu1dpwGDjDdVxvG96ABNj+/Ut1FuABVnl9+DggC7CnloIAcwJ+q4vgcJkCqKo9JiADZrDpAMgwQYF8ZjF54ALkyGl9CA5jOzAAEXwIZgHtlOLphAWTKeEyCAhiYA/RDAqgxAeTiYMvNCaBUbxEMQLaqA6CugwG4r/X8UlHAPsC03gSQSgT2AfKazy9UC9gHGNcFUJ0gALLaz69+BAFwXx+gvwgBYFYfQCQM2gZIt3h+kTDYcvcNUEot/AcYbwVw7T1AttXzS7wDlgHOtwNIFr4DtLcDEMgDlgFWWwIceA6wNgkmlzuj5fJod9XoktAuwMWaZ7sc/gqU+02uB+wCDKqdhVhzbOLRb4BZxbMg75tLhFYBssoLvdK3IPEaIK+8ziv/6ajjM8B99fT+rakgYBVg3+DX33FDQaDVRAycGJQMfY8ByvaDe0brxqG/AKnRr155M8sBmwC50d+0LBEc+gvwySyszRuJgjYBBmaJLW0kCtoEKA5rSccwaSy8BZgZ/kXnTdSCNgFM3+m0iVrQIkBm/DyrBtKARYDUOK+3G0gDFgFy48ruooE0YBHg3HiBnzawN24R4JPxOeCSxcPQU4CB+Ub3WH41IA5waP5fHj0FaJv/3nkhnwctAtSYz7l8HrQIMDMvbItrp4egAIbm1XPfU4BVjbVdMZqnAKrGw7TFCwF7ANM6v/QMxBfE0gAb3ue5eCVkDyCrA3AhflZKGqBXZwH1GA9ALl4K2gNIXw/gIKAZ0K2j1o1nBqQr6bvE0gBdC4HDVYA6f8xMfDHg2CuQiR8UciwNZkp6NeTFDLD586BjpXAmfkpEGiABoMZ7Y3M9LL0c3vA65+EDDGusBv0E0HWeZS5+Ukx8U3RSY0vMU4DiHd63a//POCSAsfnavuxs6XVAAN0aWdBTgLZ5KXgRFMDAvBBoBwVgntJK7434CVByVPitcR3oK8C58eHnQQP3ZuSPySXGSdBXgNT0BsS5CusVKLs1eGhYBnoLoA2vQeUqNICZ2V3IcXAAbaOmAOcqOIDSrDY0KYI8Brgw6ZE1UOEBlEa1gmtD31SAAOmqcr/MdNVULxWrd4fLn+pFD/1Nncd9BViT2L4/nwNfNzWb8RVgXWDr/ftJmenmLy/4CnCx9qkeWqPl8u5or0KvoY6nAFv10gsBYBo7wJbN9AIAOH4lgKGvAHnsAFnsAK8UBGzeHbUMMH+dGaC9BUhjB9i6paTHJ0Ur7HMUbZfNAwMwTYSdeTCHpTdsDZdN9uAAzIrBg8J3puszQGpY9A827x/5BWDUW7lXHDUPvAYwCYN/FXsdeg1g8KW5ZFgM8NZrgOofG1UHJauHa78Bqk+BTknanPgNUHkKdHWgAFWLoUnZ4qHjO0BefQJMw2mg8HzsV40AxZ+mW3gPUOWrwwelm2hW+4s789nd/rD0H/YDAFj3CYF/xsdyqV4IAJvCwK9DI+cBdZJ6UQ6tFej+inOfhNdCcgB6umZZ+N+JkYHwUkAQQOu9Cqcl2gG10/v/OCreI37+vZFxQA0Vi+qBgknwMNpUNXfCAdD67vcDIcnVm98DRUg9RcuC4dHuza1SKvl5c7LzssgVLwQbADCuGPsxAYjXQa4BzKXrINcApLdEnQOYCW+JugYwle4n6RpAKl4GOAZwLl4GOAYwkN4OcQ1gLJ4F3QIovDv7GBFAqsSzoFsA9/JJwC2AtvApUdcACkOA5STgFECu5JOAUwDHSj4JOAUwk26s7hhAqhpIAi4B3Cvx/TC3AGZNxECHAPIazeeCAmgr+d0QlwDkOwo7BnAs3lbdLYBsJf5tCbcAjut0IA0IoGQCWC+DnAFoq4ZCgCMAuWnbscAASs9RTiIB2G/gzrBLAO/XHp8OH6C8idSXKAC+NdI2wB2AP9ZeogsfYG/9JbrQAdJxQ71j3ACYrm8i1ddhAOyfjIqrn93VxmukQQC0VXJ1+jKeZ0cfmuyeJAyglFI/z1rv3i2Xy+Xy3VHr7LbaReqQAJRSKlErg5Yi1+EBmPUOGkYOcKAjB+hEDiAUAt0FmEQO0NeRA3yJHKC/iBxAbgK4CSAXARwFmEQO0NVxAySdyAF+6LgBBFOgmwCiL4CDALIvgHsAPR03QH8YN0DS0XEDfNRxA3zWcQM08fwuATTy/A4BnOqoAZI3OmqA3lBHDXCpdcwAD290zAD9U60jBuifLnS8AMnVjm56CDRX3/1QeCzi6WxnoXUEAFprfXe0e3Zz+/S0UkolTz9vzk52RtqN4VgjJQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH78DfUrhVFVdGJmAAAAAElFTkSuQmCC" alt="image"></span>
+					<span class="cptch_span">&nbsp;×&nbsp;</span>
+					<span class="cptch_span"><img class="cptch_img " src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIABAMAAAAGVsnJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABhQTFRFl5eXUlJS////AAAAt7e319fXJiYm7OzsqY1BfQAACG1JREFUeNrt3c9z2lYUxXHH8qTbOHTSLRIIbU0d023GxNNtxiTpNgmLblNI6b/fRZMm+sW790my54gva1+MPkhHT8cCn2Un/jgDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4TID0Ovz4LWJulU2vTY/l/0/pHnhUgMWpA6QAcAiwB5w0wF/sAWTAOACKt0+2x7bj49nFu13T4NtXl+2DHy/us+zL2SSkdHlxd//9Kd0DPS2Fi1ctW7J6dpdluyOTb540b/7vX584+3J5ZGue3dVeiXegr2uB/EXT7/twX4Qnn9bnfv7xB748bdualmd3D/RyMZQnDdtvG/1c3X1+qrypb5r26+Vt6/7oHejnajCv/1LrsTYvC/xSGPav1a1zh1zFbL/rcngaH7al0ZdNb2pt//ozkEregT76gPeVX/nSPnr44Z1q3G/yymGy2oV2SO9ADwBF5SC4cowG36mF97kX0S8mvhFKo9cbWRJ6p4ryc3/ymNoGegCo7AIrx+Tm29BN24+Un/t5+DndAz10goeyuuOwm32bOW/7iY33BLOJOiN1A8jLAOf2yX3wsFl4bRexb0aXVjiJ3e32oSOgHDArbyKtsocBOASvAQP763Pb9iy9AMsHApjGnnrWwT116t2e6WMAZLGngSRIJgKQREZvEjxoRAA2kaeBSXBABKB87vnVPLcNnqxEAKZxl0NF+GWKABRxVwPz8HlTBKCyAreuv9LwykkFYB2Vgl+j43YEAIuoi9BNeN2gAlBOwRvXMuBqDAB5VApuw9cOKgDlFFy51J6PAqC8GL71HDf3owDYR1QCC8PuIgOQRlQCG8PVswzAPKISSAznTBmAbOtOwWJrOFx0APyVwNyybtYB2LhTMLW8Rh2A1L0YPliunXUA/JWAJQOFADL3YnjScFuEMoC3EshNPygE4C1Gp6aXKATgrQRMGagE4K0E1iYoIQBvJTAxHSpCAM5K4GuRnI0IIHGloC0DpQBmrsXwwhYVSgC+SmBju2ZQAshdlUBiWy4oAfgqAWNvIAXgKUbnxhcoBeApRlNjdygFkDpuU94bexMpAE8xmrgumUQAPHcJbI3dqRSAoxKYW9tzLYDNkY/ANMXFzdgA7JXAzNodawHYi9HE+jdULQB7ClozUAygUgnsApcNV7vRAVjvlTJnoBqAtRI4mP9+JgZgLUbNGagGYF0MmzNQDcBYCeT2uyjUAGyVgD0D5QBslcDCfieVGkBq+uCAPQPlAGwpOLHfTakGUE7BZecM1AOYGO6VmjruJZQDsNwlMLNnoB6ApRJY++8n1gGwVAKODNQDMFQChecDtnIAlRTsmoGCAOFK4ODIQEGARXAx7MlAQYDPwUrAk4GCAMG7BFwZKAgQrARcGagIEKoEFp4MVAQIVQJr15csCAKEKgFXBioCBCoBXwYqAgQqAV8GSgIcrwR8GSgJcLwScK0DNQGOVwK+DJQEOFoJODNQEuBoJeDMQEmAo5WAMwM1AY5VAs4M1AQ4Vgk4M1ATIG2vBLwZqAlQqQR2HTJQE+BIJeDNQFGA9krAm4GiAO2VgDcDRQFaKwF3BooCtFYC7gwUBWhNQXcGqgK0VQLuDFQFaPvggDsDVQFaKgF/BqoCtFQCU9e3DSoDtFQC/gxUBWj5+JQ/A2UBmisBfwbKAjRWAoX5cyL6AI2VwGd/BsoCNFYCERkoC9C4GI7IQF2ApkogIgN1ARoqgdy/DhQGaPhGlYh1oDBAQyWwj8hAXYCGFEwiMlAYoF4JxGSgMECtEsgj1oHKALVKII3JQGGAWiVwiMlAYYBaJRCVgcIAtUpgG/U/QIUBKpVAHveKhAHK3yXwKXX/TUQdoPJdArOoDFQGKC+Gl9bvzhoPQGUxvDV9h+qoABr+L/vypAD2dYCbkwJI6wCfTgpgXgc4PymArA6QnRZA0j0DtQHW3TNQG2DRPQO1AabdM1AboKgC7E4MoFIJRL0cbYBKCr48OYBZ5wwUB0g7Z2B5e1ZDDAwJkHfOwMqZZIiBIQFMX6zl2YnuBxgYFCDpmoGV7TkfYGBQgH3XDKxWqwMMDAqQWr9r3HgmvRpgYFCAeefjceLN0Un34O0RIOuagXPv5dS8+/VXrwCTjhn4vrI9q/u+BwYG2Fj/50jLQmJbvZ4K3F/gHhgaYNHpjFQ0NOsfdn0ODA4w7ZKBTZtzfb262PU2MDxAEZ+B755sr5sfq2d/9DLwEADfU9BxRv779dnli7aN+e/x8ezunw4DDwiwDn3JsqFJa34s4wceEmBm/f+DYwVI/Rk4LoDc/9vHBfCtErg6WYDEm4FjA9h7M3BsAKl7HTgygLm7nh0ZQNalmXmsR68Ak6gbJEcEoPgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGDIx7/3OZQ4GekmpgAAAABJRU5ErkJggg==" alt="image"></span>
+					<span class="cptch_span">&nbsp;=&nbsp;</span>
+					<span class="cptch_span"><input id="cptch_input_27" class="cptch_input cptch_wp_comments" type="text" autocomplete="off" name="cptch_number" value="" maxlength="2" size="2" aria-required="true" required="required" style="margin-bottom:0;display:inline;font-size: 12px;width: 40px;"></span>
+					<input type="hidden" name="cptch_result" value="g+Sm"><input type="hidden" name="cptch_time" value="1574324155">
+					<input type="hidden" name="cptch_form" value="wp_comments">
+				</label><span class="cptch_reload_button_wrap hide-if-no-js">
+					<noscript>
+						<style type="text/css">
+							.hide-if-no-js {
+								display: none !important;
+							}
+						</style>
+					</noscript>
+					<span class="cptch_reload_button dashicons dashicons-update"></span>
+				</span></span></p><!-- Subscribe to Comments Reloaded version 190412 --><!-- Subscribe to comments Reloaded MP: '/comment-subscriptions/' --><!-- BEGIN: subscribe to comments reloaded --><p class="comment-form-subscriptions"><label for="subscribe-reloaded"><select name="subscribe-reloaded" id="subscribe-reloaded">
+								<option value="none">不要 订阅 评论</option>
+								<option value="yes">订阅 所有评论</option>
+								<option value="replies" selected="selected">订阅 我评论的回答</option>
+							</select> 有新评论,请电子邮件通知我。你也不需要留评论就可以<a href="https://cokebar.info/comment-subscriptions/?srp=767&amp;srk=f4cb36d5d4b3d3411d7b455e358f0fce&amp;sra=s&amp;srsrc=f">订阅</a>。</label></p><!-- END: subscribe to comments reloaded --><p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="发表评论"> <input type="hidden" name="comment_post_ID" value="767" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p>			</form>
+			</div><!-- #respond -->
+	
+</div><!-- #comments .comments-area -->
+		</article>
+	</section>
+</div><!-- #content --></div><!-- #primary -->
+
+
+<div id="secondary">
+	
+
+<aside id="search-3" class="widget widget_search">	<form action="https://cokebar.info/" class="searchform clearfix" method="get">
+		<label class="assistive-text" for="s">搜索</label>
+		<input type="text" placeholder="搜索" class="s field" name="s" autocomplete="off">
+	</form></aside><aside id="custom_html-2" class="widget_text widget widget_custom_html"><h3 class="widget-title">VPS推荐</h3><div class="textwidget custom-html-widget"><a href="https://bandwagonhost.com/aff.php?aff=6322" target="_blank" rel="noopener noreferrer"><img class="alignnone wp-image-1566 size-medium" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/bandwagon-289x300.png" alt="bandwagon" width="289" height="300"></a>
+<a href="https://my.hostus.us/aff.php?aff=2307" target="_blank" rel="noopener"><img class="alignnone size-full wp-image-2494" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/hostus.png" alt="" width="337" height="412"></a>
+<a href="https://www.vultr.com/?ref=7971607-4F" target="_blank" rel="noopener"><img class="alignnone wp-image-2200 size-full" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/vultr.png" alt="" width="308" height="293"></a></div></aside><aside id="tag_cloud-2" class="widget widget_tag_cloud"><h3 class="widget-title">标签</h3><div class="tagcloud"><a href="https://cokebar.info/tags/android-2" class="tag-cloud-link tag-link-67 tag-link-position-1" style="font-size: 13.384615384615pt;" aria-label="android (3个项目)">android</a>
+<a href="https://cokebar.info/tags/bind" class="tag-cloud-link tag-link-62 tag-link-position-2" style="font-size: 8pt;" aria-label="bind (1个项目)">bind</a>
+<a href="https://cokebar.info/tags/chinadns" class="tag-cloud-link tag-link-69 tag-link-position-3" style="font-size: 11.230769230769pt;" aria-label="chinadns (2个项目)">chinadns</a>
+<a href="https://cokebar.info/tags/chrome" class="tag-cloud-link tag-link-15 tag-link-position-4" style="font-size: 8pt;" aria-label="chrome (1个项目)">chrome</a>
+<a href="https://cokebar.info/tags/dig" class="tag-cloud-link tag-link-63 tag-link-position-5" style="font-size: 8pt;" aria-label="dig (1个项目)">dig</a>
+<a href="https://cokebar.info/tags/dns" class="tag-cloud-link tag-link-16 tag-link-position-6" style="font-size: 22pt;" aria-label="DNS (11个项目)">DNS</a>
+<a href="https://cokebar.info/tags/dnsmasq" class="tag-cloud-link tag-link-17 tag-link-position-7" style="font-size: 13.384615384615pt;" aria-label="dnsmasq (3个项目)">dnsmasq</a>
+<a href="https://cokebar.info/tags/galaxy-s5" class="tag-cloud-link tag-link-20 tag-link-position-8" style="font-size: 8pt;" aria-label="galaxy s5 (1个项目)">galaxy s5</a>
+<a href="https://cokebar.info/tags/gfw" class="tag-cloud-link tag-link-21 tag-link-position-9" style="font-size: 8pt;" aria-label="GFW (1个项目)">GFW</a>
+<a href="https://cokebar.info/tags/gfwlist" class="tag-cloud-link tag-link-91 tag-link-position-10" style="font-size: 11.230769230769pt;" aria-label="gfwlist (2个项目)">gfwlist</a>
+<a href="https://cokebar.info/tags/goagent" class="tag-cloud-link tag-link-22 tag-link-position-11" style="font-size: 11.230769230769pt;" aria-label="goagent (2个项目)">goagent</a>
+<a href="https://cokebar.info/tags/google" class="tag-cloud-link tag-link-23 tag-link-position-12" style="font-size: 15.179487179487pt;" aria-label="google (4个项目)">google</a>
+<a href="https://cokebar.info/tags/hosts" class="tag-cloud-link tag-link-24 tag-link-position-13" style="font-size: 8pt;" aria-label="hosts (1个项目)">hosts</a>
+<a href="https://cokebar.info/tags/https" class="tag-cloud-link tag-link-25 tag-link-position-14" style="font-size: 11.230769230769pt;" aria-label="https (2个项目)">https</a>
+<a href="https://cokebar.info/tags/iphone" class="tag-cloud-link tag-link-71 tag-link-position-15" style="font-size: 8pt;" aria-label="iphone (1个项目)">iphone</a>
+<a href="https://cokebar.info/tags/lede" class="tag-cloud-link tag-link-124 tag-link-position-16" style="font-size: 16.615384615385pt;" aria-label="LEDE (5个项目)">LEDE</a>
+<a href="https://cokebar.info/tags/openwrt" class="tag-cloud-link tag-link-27 tag-link-position-17" style="font-size: 22pt;" aria-label="openwrt (11个项目)">openwrt</a>
+<a href="https://cokebar.info/tags/pascal" class="tag-cloud-link tag-link-113 tag-link-position-18" style="font-size: 11.230769230769pt;" aria-label="pascal (2个项目)">pascal</a>
+<a href="https://cokebar.info/tags/pdnsd" class="tag-cloud-link tag-link-81 tag-link-position-19" style="font-size: 13.384615384615pt;" aria-label="pdnsd (3个项目)">pdnsd</a>
+<a href="https://cokebar.info/tags/pushbullet" class="tag-cloud-link tag-link-78 tag-link-position-20" style="font-size: 8pt;" aria-label="pushbullet (1个项目)">pushbullet</a>
+<a href="https://cokebar.info/tags/reverse-proxy" class="tag-cloud-link tag-link-82 tag-link-position-21" style="font-size: 8pt;" aria-label="Reverse Proxy (1个项目)">Reverse Proxy</a>
+<a href="https://cokebar.info/tags/samsung" class="tag-cloud-link tag-link-29 tag-link-position-22" style="font-size: 8pt;" aria-label="Samsung (1个项目)">Samsung</a>
+<a href="https://cokebar.info/tags/shadowsocks" class="tag-cloud-link tag-link-30 tag-link-position-23" style="font-size: 21.282051282051pt;" aria-label="shadowsocks (10个项目)">shadowsocks</a>
+<a href="https://cokebar.info/tags/shadowsocks-libev" class="tag-cloud-link tag-link-125 tag-link-position-24" style="font-size: 11.230769230769pt;" aria-label="shadowsocks-libev (2个项目)">shadowsocks-libev</a>
+<a href="https://cokebar.info/tags/ss-server" class="tag-cloud-link tag-link-97 tag-link-position-25" style="font-size: 11.230769230769pt;" aria-label="ss-server (2个项目)">ss-server</a>
+<a href="https://cokebar.info/tags/ssl" class="tag-cloud-link tag-link-56 tag-link-position-26" style="font-size: 8pt;" aria-label="ssl (1个项目)">ssl</a>
+<a href="https://cokebar.info/tags/switchsharp" class="tag-cloud-link tag-link-32 tag-link-position-27" style="font-size: 8pt;" aria-label="switchsharp (1个项目)">switchsharp</a>
+<a href="https://cokebar.info/tags/tls" class="tag-cloud-link tag-link-57 tag-link-position-28" style="font-size: 8pt;" aria-label="tls (1个项目)">tls</a>
+<a href="https://cokebar.info/tags/unbound" class="tag-cloud-link tag-link-35 tag-link-position-29" style="font-size: 11.230769230769pt;" aria-label="unbound (2个项目)">unbound</a>
+<a href="https://cokebar.info/tags/vpn" class="tag-cloud-link tag-link-36 tag-link-position-30" style="font-size: 11.230769230769pt;" aria-label="VPN (2个项目)">VPN</a>
+<a href="https://cokebar.info/tags/vps" class="tag-cloud-link tag-link-38 tag-link-position-31" style="font-size: 8pt;" aria-label="vps (1个项目)">vps</a>
+<a href="https://cokebar.info/tags/wikipedia" class="tag-cloud-link tag-link-39 tag-link-position-32" style="font-size: 8pt;" aria-label="wikipedia (1个项目)">wikipedia</a>
+<a href="https://cokebar.info/tags/windows-2" class="tag-cloud-link tag-link-61 tag-link-position-33" style="font-size: 11.230769230769pt;" aria-label="windows (2个项目)">windows</a>
+<a href="https://cokebar.info/tags/world-wide-web" class="tag-cloud-link tag-link-40 tag-link-position-34" style="font-size: 8pt;" aria-label="world wide web (1个项目)">world wide web</a>
+<a href="https://cokebar.info/tags/www" class="tag-cloud-link tag-link-41 tag-link-position-35" style="font-size: 8pt;" aria-label="www (1个项目)">www</a>
+<a href="https://cokebar.info/tags/%e4%b8%87%e7%bb%b4%e7%bd%91" class="tag-cloud-link tag-link-42 tag-link-position-36" style="font-size: 8pt;" aria-label="万维网 (1个项目)">万维网</a>
+<a href="https://cokebar.info/tags/%e4%b8%89%e6%98%9f" class="tag-cloud-link tag-link-43 tag-link-position-37" style="font-size: 8pt;" aria-label="三星 (1个项目)">三星</a>
+<a href="https://cokebar.info/tags/%e4%b8%ad%e9%97%b4%e4%ba%ba%e6%94%bb%e5%87%bb" class="tag-cloud-link tag-link-59 tag-link-position-38" style="font-size: 11.230769230769pt;" aria-label="中间人攻击 (2个项目)">中间人攻击</a>
+<a href="https://cokebar.info/tags/%e4%bb%a3%e7%90%86" class="tag-cloud-link tag-link-44 tag-link-position-39" style="font-size: 11.230769230769pt;" aria-label="代理 (2个项目)">代理</a>
+<a href="https://cokebar.info/tags/%e5%8a%a0%e5%af%86" class="tag-cloud-link tag-link-58 tag-link-position-40" style="font-size: 8pt;" aria-label="加密 (1个项目)">加密</a>
+<a href="https://cokebar.info/tags/%e5%be%ae%e8%bd%af" class="tag-cloud-link tag-link-60 tag-link-position-41" style="font-size: 8pt;" aria-label="微软 (1个项目)">微软</a>
+<a href="https://cokebar.info/tags/%e7%a7%91%e5%ad%a6%e4%b8%8a%e7%bd%91" class="tag-cloud-link tag-link-45 tag-link-position-42" style="font-size: 17.871794871795pt;" aria-label="科学上网 (6个项目)">科学上网</a>
+<a href="https://cokebar.info/tags/%e7%bf%bb%e5%a2%99" class="tag-cloud-link tag-link-96 tag-link-position-43" style="font-size: 13.384615384615pt;" aria-label="翻墙 (3个项目)">翻墙</a>
+<a href="https://cokebar.info/tags/%e8%af%81%e4%b9%a6" class="tag-cloud-link tag-link-53 tag-link-position-44" style="font-size: 8pt;" aria-label="证书 (1个项目)">证书</a>
+<a href="https://cokebar.info/tags/%e8%b7%af%e7%94%b1%e5%99%a8" class="tag-cloud-link tag-link-49 tag-link-position-45" style="font-size: 16.615384615385pt;" aria-label="路由器 (5个项目)">路由器</a></div>
+</aside><aside id="categories-2" class="widget widget_categories"><h3 class="widget-title">分类目录</h3>		<ul>
+				<li class="cat-item cat-item-2"><a href="https://cokebar.info/it-industry">IT业界</a> (9)
+</li>
+	<li class="cat-item cat-item-141"><a href="https://cokebar.info/vps%e8%af%84%e6%b5%8b">VPS评测</a> (1)
+</li>
+	<li class="cat-item cat-item-3"><a href="https://cokebar.info/internet">互联网</a> (31)
+<ul class="children">
+	<li class="cat-item cat-item-7"><a href="https://cokebar.info/internet/explore-the-world">探索世界</a> (18)
+</li>
+	<li class="cat-item cat-item-10"><a href="https://cokebar.info/internet/net-tech">网络技术</a> (13)
+</li>
+</ul>
+</li>
+	<li class="cat-item cat-item-8"><a href="https://cokebar.info/announcements">站点公告</a> (1)
+</li>
+	<li class="cat-item cat-item-11"><a href="https://cokebar.info/software">软件</a> (22)
+<ul class="children">
+	<li class="cat-item cat-item-12"><a href="https://cokebar.info/software/android">Android</a> (4)
+</li>
+	<li class="cat-item cat-item-13"><a href="https://cokebar.info/software/linux">Linux</a> (5)
+</li>
+	<li class="cat-item cat-item-127"><a href="https://cokebar.info/software/openwrt">OpenWrt</a> (10)
+</li>
+	<li class="cat-item cat-item-14"><a href="https://cokebar.info/software/windows">Windows</a> (3)
+</li>
+</ul>
+</li>
+		</ul>
+			</aside><aside id="recent-comments-2" class="widget widget_recent_comments"><h3 class="widget-title">近期评论</h3><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link">wugang</span>发表在《<a href="https://cokebar.info/archives/664/comment-page-78#comment-4563">Shadowsocks + ChnRoute 实现 OpenWRT / LEDE 路由器自动科学上网</a>》</li><li class="recentcomments"><span class="comment-author-link">dalton</span>发表在《<a href="https://cokebar.info/archives/664/comment-page-78#comment-4544">Shadowsocks + ChnRoute 实现 OpenWRT / LEDE 路由器自动科学上网</a>》</li><li class="recentcomments"><span class="comment-author-link">Lubinson</span>发表在《<a href="https://cokebar.info/archives/664/comment-page-77#comment-4543">Shadowsocks + ChnRoute 实现 OpenWRT / LEDE 路由器自动科学上网</a>》</li><li class="recentcomments"><span class="comment-author-link">Lubinson</span>发表在《<a href="https://cokebar.info/archives/664/comment-page-78#comment-4542">Shadowsocks + ChnRoute 实现 OpenWRT / LEDE 路由器自动科学上网</a>》</li><li class="recentcomments"><span class="comment-author-link">Lubinson</span>发表在《<a href="https://cokebar.info/archives/664/comment-page-77#comment-4541">Shadowsocks + ChnRoute 实现 OpenWRT / LEDE 路由器自动科学上网</a>》</li></ul></aside><aside id="calendar-2" class="widget widget_calendar"><div id="calendar_wrap" class="calendar_wrap"><table id="wp-calendar">
+	<caption>2019年十一月</caption>
+	<thead>
+	<tr>
+		<th scope="col" title="星期一">一</th>
+		<th scope="col" title="星期二">二</th>
+		<th scope="col" title="星期三">三</th>
+		<th scope="col" title="星期四">四</th>
+		<th scope="col" title="星期五">五</th>
+		<th scope="col" title="星期六">六</th>
+		<th scope="col" title="星期日">日</th>
+	</tr>
+	</thead>
+
+	<tfoot>
+	<tr>
+		<td colspan="3" id="prev"><a href="https://cokebar.info/archives/date/2019/06">« 6月</a></td>
+		<td class="pad">&nbsp;</td>
+		<td colspan="3" id="next" class="pad">&nbsp;</td>
+	</tr>
+	</tfoot>
+
+	<tbody>
+	<tr>
+		<td colspan="4" class="pad">&nbsp;</td><td>1</td><td>2</td><td>3</td>
+	</tr>
+	<tr>
+		<td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td>
+	</tr>
+	<tr>
+		<td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td>
+	</tr>
+	<tr>
+		<td>18</td><td>19</td><td>20</td><td id="today">21</td><td>22</td><td>23</td><td>24</td>
+	</tr>
+	<tr>
+		<td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td>
+		<td class="pad" colspan="1">&nbsp;</td>
+	</tr>
+	</tbody>
+	</table></div></aside>
+</div><!-- #secondary --></div><!-- #container -->
+
+
+	   </div><!-- #main -->
+
+	   
+	   	
+	   
+	   <footer id="footerarea" class="clearfix">
+			
+
+
+<div id="site-generator">
+				<div class="container"><div class="copyright">Copyright © 2019 <a href="https://cokebar.info/" title="飞羽博客"><span>飞羽博客</span></a> 主题作者: <a href="http://colorlib.com/wp/travelify/" target="_blank" title="Colorlib"><span>Colorlib</span></a>  光荣地使用 <a href="http://wordpress.org/" target="_blank" title="WordPress"><span>WordPress</span></a> </div><!-- .copyright --><div class="footer-right">本站文章采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0 授权条款</a>授权&nbsp;&nbsp;.<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="CC授权条款" style="border-width:0" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/license_80x15.png">&nbsp;&nbsp;&nbsp;&nbsp;</a></div><div style="clear:both;"></div>
+			</div><!-- .container -->
+			</div><!-- #site-generator --><div class="back-to-top" style="display: block;"><a href="https://cokebar.info/archives/767#branding"></a></div>		</footer>
+	   
+			
+
+	</div><!-- .wrapper -->
+
+	 
+
+
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-47510805-1', 'auto');
+			ga('require', 'linkid', 'linkid.js');
+			ga('set', 'forceSSL', true);
+			ga('send', 'pageview');
+		</script>
+
+	<link rel="stylesheet" id="crayon-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/crayon.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="google_font_ubuntu-css" href="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/css.php" type="text/css" media="all">
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/comment-reply.min.js.下载"></script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/wp-embed.min.js.下载"></script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/jquery.js.下载"></script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/jquery-migrate.min.js.下载"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var CrayonSyntaxSettings = {"version":"_2.7.2_beta","is_admin":"0","ajaxurl":"https:\/\/cokebar.info\/wp-admin\/admin-ajax.php","prefix":"crayon-","setting":"crayon-setting","selected":"crayon-setting-selected","changed":"crayon-setting-changed","special":"crayon-setting-special","orig_value":"data-orig-value","debug":""};
+var CrayonSyntaxStrings = {"copy":"Press %s to Copy, %s to Paste","minimize":"Click To Expand Code"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/crayon.min.js.下载"></script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/functions.min.js.下载"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var cptch_vars = {"nonce":"7d53d1bd19","ajaxurl":"https:\/\/cokebar.info\/wp-admin\/admin-ajax.php","enlarge":""};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/front_end_script.js.下载"></script>
+
+
+<div class="swiftype-widget"><div class="autocomplete" style="position: absolute; z-index: 9999; top: 263px; left: 924.625px; width: 255px; display: none;"><ul></ul></div></div><iframe id="blockbyte-bs-sidebar" class="notranslate" data-pos="right" src="./Shadowsocks - libev 服务端的部署 - 飞羽博客_files/saved_resource.html"></iframe><div id="blockbyte-bs-indicator" class="blockbyte-bs-fullHeight" style="width: 1px; height: 100%; top: 0%;"></div></body></html>
