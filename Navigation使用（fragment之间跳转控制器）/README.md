@@ -2,7 +2,7 @@
 
 [TOC]
 
-![1](C:\Users\Administrator\Desktop\HaoNote\Navigation使用（fragment之间跳转控制器）\1.gif)
+![1](1.gif)
 
 ### 使用
 
@@ -17,7 +17,7 @@ implementation "android.arch.navigation:navigation-ui:1.0.0-alpha06"
 
 3.创建两个fragment: MainFragment和TwoFragment
 
-4.res文件夹右键-->New Resource Directory , Resource type选择navigation.![2](C:\Users\Administrator\Desktop\HaoNote\Navigation使用（fragment之间跳转控制器）\2.png)
+4.res文件夹右键-->New Resource Directory , Resource type选择navigation.![2](2.png)
 
 5.在navigation文件夹右键 --> New -->Navigation resource file,新建xml文件`to_fragment.xml`
 
