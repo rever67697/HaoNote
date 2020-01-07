@@ -179,5 +179,5 @@
 
 具体说明和例子可参考:
 
-<https://pub.dev/packages/ace_bottom_navigation_bar#-readme-tab->
+<https://pub.dev/packages/ace_bottom_navigation_bar>
 
