@@ -4,7 +4,7 @@
 
 效果演示:
 
-![1](C:\Users\Administrator\Desktop\HaoNote\Room数据库\1.gif)
+![1](1.gif)
 
 
 
