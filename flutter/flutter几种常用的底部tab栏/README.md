@@ -163,11 +163,70 @@
   }
 ~~~~
 
+方法二：
+
+~~~~dart
+ floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Toasts.show("点击了");
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          )),
+ //floatingActionButton居中显示
+ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+ bottomNavigationBar: BottomAppBar(
+  color: Colors.white,
+  shape: CircularNotchedRectangle(), // 底部导航栏打一个圆形的洞
+  child: Row(
+    children: [
+      IconButton(icon: Icon(Icons.home)),
+      SizedBox(), //中间位置空出
+      IconButton(icon: Icon(Icons.business)),
+    ],
+    mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+  ),
+)
+~~~~
+
 
 
 ## 底部凸型tab栏
 
-需要使用第三方库`ace_bottom_navigation_bar`.
+方法一：
+
+~~~~dart
+ floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Toasts.show("点击了");
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          )),
+ //floatingActionButton居中显示
+ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+ bottomNavigationBar: BottomAppBar(
+  color: Colors.white,
+  //和上一个一样，只需注释这一行
+  //shape: CircularNotchedRectangle(), // 底部导航栏打一个圆形的洞
+  child: Row(
+    children: [
+      IconButton(icon: Icon(Icons.home)),
+      SizedBox(), //中间位置空出
+      IconButton(icon: Icon(Icons.business)),
+    ],
+    mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+  ),
+)
+~~~~
+
+
+
+
+
+方法二：需要使用第三方库`ace_bottom_navigation_bar`.
 
 效果图:
 
