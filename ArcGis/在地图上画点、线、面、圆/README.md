@@ -22,7 +22,7 @@ Graphic graphic = new Graphic(gisPoint, shipSymbol);
 mGraphicsLayer.addGraphic(graphic);
 
 //画线或者画面（画面只需要最后连接起点就行）
-//创建多边形对象
+//创建多边形对象(Polygon：画首尾相连的；Polyline：首尾不相连的线)
 Polygon poly = new Polygon();
 //添加初始点
 poly.startPath((Point) GeometryEngine.project(new Point(122.037, 25.66355), SpatialReference.create(4326), SpatialReference.create(102113)));
@@ -30,10 +30,15 @@ poly.lineTo((Point) GeometryEngine.project(new Point(122.5054766667, 25.92664666
 poly.lineTo((Point) GeometryEngine.project(new Point(121.751366667, 25.1649166667), SpatialReference.create(4326), SpatialReference.create(102113)));
 //多边形是闭合的因此最后还要添加初始点的位置
 poly.lineTo((Point) GeometryEngine.project(new Point(122.037, 25.66355), SpatialReference.create(4326), SpatialReference.create(102113)));
+//画的实线，并且填充闭合面积颜色为红色
 SimpleFillSymbol sfs = new SimpleFillSymbol(Color.RED);
 sfs.setAlpha(50);
 Graphic graphic = new Graphic(poly, sfs);
 mGraphicsLayer.addGraphic(graphic);
+//画虚线这样写
+val dashLineSymbol = SimpleLineSymbol(resources.getColor(R.color.blue), 5.0f, 	       SimpleLineSymbol.STYLE.DASH)
+val pathGraphic = Graphic(poly, dashLineSymbol)
+mGraphicsLayer.addGraphic(pathGraphic)
 
 //画圆
 drawCircle(gisPoint, 10000, 50, Color.RED);
