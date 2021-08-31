@@ -40,6 +40,7 @@ val dashLineSymbol = SimpleLineSymbol(resources.getColor(R.color.blue), 5.0f, 	 
 val pathGraphic = Graphic(poly, dashLineSymbol)
 mGraphicsLayer.addGraphic(pathGraphic)
 
+    
 //画圆
 drawCircle(gisPoint, 10000, 50, Color.RED);
 
