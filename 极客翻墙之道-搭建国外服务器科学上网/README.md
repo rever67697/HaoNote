@@ -215,7 +215,7 @@ git clone https://github.com/flyzy2005/ss-fly
 2.运行搭建脚本代码 
 
 ~~~~java
-ss-fly/ss-fly.sh -***
+ss-fly/ss-fly.sh -ssr
 ~~~~
 
 3.输入对应的参数
@@ -355,3 +355,40 @@ shadowsocks苹果客户端经常会被App Store下架，可以在App Store搜索
 ![22](C:\Users\Administrator\Desktop\HaoNote\极客翻墙之道-搭建国外服务器科学上网\22.png)
 
 配置好之后,点击开启或者确定就可以翻墙上网了,赶紧试下吧.
+
+
+
+记录上边ss脚本不能用的时候，需要用下边的：
+
+~~~~
+wget –no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
+~~~~
+
+~~~
+chmod +x shadowsocks-all.sh
+~~~
+
+~~~
+./shadowsocks-all.sh 2>&1| tee shadowsocks-all.log
+~~~
+
+
+
+### 注意
+
+如果ip检测端口号，国内和国外tcp都不可用，那应该是防火墙屏蔽了端口。
+
+查看防火墙状态：active为活跃状态；inactive为禁用状态
+
+~~~
+sudo ufw status
+~~~
+
+设置允许外部访问某端口：
+
+~~~
+sudo ufw allow 1226
+~~~
+
+
+
